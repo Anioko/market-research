@@ -45,6 +45,7 @@
                         <th>Project Id</th>
                         <th>Asked By</th>
                         <th class="sorted ascending">Created At</th>
+                        <th> Action </th>
                     </tr>
                     </thead>
                     <tbody>
@@ -53,6 +54,7 @@
 
                             <td>{{ project.id }}</td>
                             <td>{{ project.name }}</td>
+                            <td>{{ project.created_at}}</td>
                             <td> 
                                 <a class="ui red left floated button" style="margin-top: 1px"
                                    href="{{ url_for('admin.delete_project', project_id=project.id) }}" onclick="return confirmDeleteProject('{{ project.id | tojson }}');" data-content="{{ project.id }}">Delete</a>

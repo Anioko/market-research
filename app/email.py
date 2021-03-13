@@ -51,6 +51,7 @@ def send_email(recipient, subject, template, **kwargs):
     app.config['MAIL_SUPPRESS_SEND'] = False
     mail.init_app(app)
     with app.app_context():
+        print()
         msg = Message(
             app.config['EMAIL_SUBJECT_PREFIX'] + ' ' + subject,
             sender=app.config['EMAIL_SENDER'],

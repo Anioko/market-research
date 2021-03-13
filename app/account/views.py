@@ -69,6 +69,7 @@ def register():
             confirm_link=confirm_link)
         flash('A confirmation link has been sent to {}.'.format(user.email),
               'warning')
+        print("The Email has been sent")
         return redirect(url_for('main.index'))
     return render_template('account/register.html', form=form)
 
@@ -196,6 +197,7 @@ def change_email(token):
 @login_required
 def confirm_request():
     """Respond to new user's request to confirm their account."""
+    print("Hello Confirm Request")
     token = current_user.generate_confirmation_token()
     confirm_link = url_for('account.confirm', token=token, _external=True)
     get_queue().enqueue(
@@ -276,9 +278,10 @@ def join_from_invite(user_id, token):
 @account.before_app_request
 def before_request():
     """Force user to confirm email before accessing login-required routes."""
+    print(request.endpoint)
     if current_user.is_authenticated \
             and not current_user.confirmed \
-            and request.endpoint[:8] != 'account.' \
+            and not request.endpoint.startswith('account.') \
             and request.endpoint != 'static':
         return redirect(url_for('account.unconfirmed'))
 

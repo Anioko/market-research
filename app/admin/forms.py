@@ -129,4 +129,9 @@ class TrackingScriptForm(FlaskForm):
     name = StringField("Script Name e.g Hotjar or Google Analytics", validators=[DataRequired(), Length(min=2, max=25)])
     script = TextAreaField("Paste the raw script")
     submit = SubmitField('Submit')
-    
+
+
+class QuestionForm(FlaskForm):
+    title = StringField("Question Title", validators=[DataRequired(), Length(min=2, max=25)])
+    description = TextAreaField("Enter Question Description")
+    submit = SubmitField('Submit')

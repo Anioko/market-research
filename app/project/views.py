@@ -166,7 +166,7 @@ def order_details(org_id, project_id, name):
     project = db.session.query(Project).filter_by(user_id=current_user.id).filter(Project.id==project_id).first()
 
     project_id=project_id
-    count_screener_questions = ScreenerQuestion.query.filter_by(user_id=current_user.id).filter(project_id==project_id).first()
+    count_screener_questions = ScreenerQuestion.query.filter_by(user_id=current_user.id).filter(project_id==project_id).count()
 
 
     count_questions = Question.query.filter_by(user_id=current_user.id).filter(project_id == project_id).count()

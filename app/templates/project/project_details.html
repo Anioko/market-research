@@ -55,7 +55,6 @@
                 </div>
             </h2>
             <div class="ui header" style="width: 100%; height: 50px">
-                <a class="ui teal left floated button" href="{{ url_for('project.index') }}">Create New Project</a>
 				{% if count_screener_questions %} <!----limit to only 10 questions per project --->
 							{% else %}
 				<a class="ui teal right floated button" href="{{ url_for('question.new_screener_question', project_id=project_id, org_id=org.id) }}">Create Screener Question</a>
@@ -63,8 +62,8 @@
 		       {% if count_questions >= 10 %}
 				        <a href="#" id="buy_now_btn" class="ui teal right floated button">Submit Questions</a>
 			   {% else %}
-				<a class="ui teal right floated button" href="{{ url_for('question.new_scale_question', project_id=project_id, org_id=org.id) }}">Create Scale Question</a>
-				
+				<a class="ui teal right floated button" href="{{ url_for('question.new_scale_question', project_id=project_id, org_id=org.id) }}">Create Scale Question</a>				
+				<a class="ui teal left floated button" href="{{ url_for('question.new_question', project_id=project_id, org_id=org.id) }}">Add Question</a>
 				<a class="ui teal right floated button" href="{{ url_for('question.new_multiple_choice_question', project_id=project_id, org_id=org.id) }}">Add Multi Choice Question</a>
                 {% endif %}
 			</div>

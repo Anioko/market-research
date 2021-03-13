@@ -40,7 +40,7 @@ def index(page):
 
 
 
-@question.route('/<org_id>/<project_id>/question/create/', methods=['Get', 'POST'])
+@question.route('/<org_id>/<project_id>/question/create/', methods=['GET', 'POST'])
 @login_required
 def new_question(org_id, project_id):
     org = Organisation.query.filter_by(user_id=current_user.id).filter_by(id=org_id).first_or_404()
@@ -48,43 +48,44 @@ def new_question(org_id, project_id):
     q = db.session.query(Question).filter_by(user_id=current_user.id).filter(Project.id==project_id).first()        
     form = AddQuestionForm()
     if form.validate_on_submit():
-        appt = Question(
-            project_id = project.id,
-            question_id = db.session.query(Question).filter_by(user_id=current_user.id).filter(Project.id==project_id).first(),
+        try:
+            appt = Question(
+                project_id = project.id,
+                question_id = db.session.query(Question).filter_by(user_id=current_user.id).filter(Project.id==project_id).first(),
 
-            title=form.title.data,
-            description=form.description.data,
-            organisation_id = org_id,			
-            multiple_choice_option_one = form.multiple_choice_option_one.data,
-            multiple_choice_option_two = form.multiple_choice_option_two.data,
-            multiple_choice_option_three = form.multiple_choice_option_three.data,
-            multiple_choice_option_four = form.multiple_choice_option_four.data,
-            multiple_choice_option_five = form.multiple_choice_option_five.data,			
-			
-            option_one = form.option_one.data,
-            option_two = form.option_two.data,
-            option_three = form.option_three.data,
-            option_four = form.option_four.data,
-            option_five = form.option_five.data,
+                title=form.title.data,
+                description=form.description.data,
+                organisation_id = org_id,			
+                multiple_choice_option_one = form.multiple_choice_option_one.data,
+                multiple_choice_option_two = form.multiple_choice_option_two.data,
+                multiple_choice_option_three = form.multiple_choice_option_three.data,
+                multiple_choice_option_four = form.multiple_choice_option_four.data,
+                multiple_choice_option_five = form.multiple_choice_option_five.data,			
+                
+                option_one = form.option_one.data,
+                option_two = form.option_two.data,
+                option_three = form.option_three.data,
+                option_four = form.option_four.data,
+                option_five = form.option_five.data,
 
-            option_one_scale = form.option_one_scale.data,
-            option_two_scale = form.option_two_scale.data,
-            option_three_scale = form.option_three_scale.data,
-            option_four_scale = form.option_four_scale.data,
-            option_five_scale = form.option_five_scale.data,
-			
-            user_id=current_user.id
-            )
-        db.session.add(appt)
-        db.session.commit()
-        flash('Successfully created'.format(appt.question), 'form-success')
-        return redirect(url_for('project.project_details', org_id=org_id, project_id=project_id, name=appt.question))
-
-    else:
-        flash('ERROR! Data was not added.', 'error')
+                option_one_scale = form.option_one_scale.data,
+                option_two_scale = form.option_two_scale.data,
+                option_three_scale = form.option_three_scale.data,
+                option_four_scale = form.option_four_scale.data,
+                option_five_scale = form.option_five_scale.data,
+                
+                user_id=current_user.id
+                )
+            db.session.add(appt)
+            db.session.commit()
+            flash('Successfully created'.format(appt.question), 'form-success')
+            return redirect(url_for('project.project_details', org_id=org_id, project_id=project_id, name=appt.question))
+        except Exception as e:
+            flash('ERROR! Data was not added.', 'error')
+            print(e)
     return render_template('question/create_question.html', form=form)
 
-@question.route('/<org_id>/<project_id>/scr/create/', methods=['Get', 'POST'])
+@question.route('/<org_id>/<project_id>/scr/create/', methods=['GET', 'POST'])
 @login_required
 def new_screener_question(org_id, project_id):
     org = Organisation.query.filter_by(user_id=current_user.id).filter_by(id=org_id).first_or_404()
@@ -98,11 +99,14 @@ def new_screener_question(org_id, project_id):
     form = AddScreenerQuestionForm()
     if form.validate_on_submit():
         appt = ScreenerQuestion(
-            project_id = project.id,
+            project_id=project.id,
             question=form.question.data,
             description=form.description.data,
             required_answer = form.required_answer.data,
-            #options = form.options.data,
+            answer_option_one=form.answer_option_one.data,
+            answer_option_two=form.answer_option_two.data,
+            answer_option_three=form.answer_option_three.data,
+            question_id=1,
             user_id=current_user.id
             )
         db.session.add(appt)
