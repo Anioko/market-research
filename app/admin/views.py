@@ -9,6 +9,7 @@ from flask import (
 )
 from flask_login import current_user, login_required
 from flask_rq import get_queue
+from sqlalchemy.orm import with_polymorphic
 
 from app import db
 from app.admin.forms import (
@@ -235,7 +236,9 @@ def delete_multiple_choice_questions(questions_id):
 @login_required
 @admin_required
 def questions(page):
-    questions_result = Question.query.paginate(page, per_page=100)
+    questions_poly = with_polymorphic(Question, [ScreenerQuestion, ScaleQuestion, MultipleChoiceQuestion])
+    questions_result = db.session.query(Question).paginate(page, per_page=100)
+    print(questions_result)
     return render_template('admin/questions/browse.html', questions=questions_result)
 
 

@@ -56,9 +56,9 @@ class User(UserMixin, db.Model):
     is_respondent = db.Column(db.Boolean, default=False)
     is_organisation = db.Column(db.Boolean, default=False)
     questions = db.relationship('Question', backref='user', lazy='dynamic')
-    multiple_choice_questions = db.relationship('MultipleChoiceQuestion', backref='user', lazy='dynamic')
-    scale_questions = db.relationship('ScaleQuestion', backref='user', lazy='dynamic')
-    screener_questions = db.relationship('ScreenerQuestion', backref='user', lazy='dynamic')
+    #multiple_choice_questions = db.relationship('MultipleChoiceQuestion', backref='user', lazy='dynamic')
+    #scale_questions = db.relationship('ScaleQuestion', backref='user', lazy='dynamic')
+    #screener_questions = db.relationship('ScreenerQuestion', backref='user', lazy='dynamic')
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)

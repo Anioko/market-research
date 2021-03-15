@@ -9,7 +9,7 @@ class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String)
     description = db.Column(db.String)
-    question_type = db.Column(String(50), nullable=False)
+    question_type = db.Column(db.String(50), nullable=False)
 
     timestamp = db.Column(db.DateTime, index=True, default=db.func.now())
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"))
@@ -43,7 +43,8 @@ class Question(db.Model):
         
         screener_question = db.relationship("ScreenerQuestion", backref=db.backref('questions'))
         scale_question = db.relationship("ScaleQuestion", backref=db.backref('questions'))
-        multiple_choice_question = db.relationship("MultipleChoiceQuestion", backref=db.backref('questions'))"""
+        multiple_choice_question = db.relationship("MultipleChoiceQuestion", backref=db.backref('questions'))
+    """
 
 
 
@@ -74,7 +75,7 @@ class Answer(db.Model):
 
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
-    answer_type = db.Column(String(50), nullable=False)
+    answer_type = db.Column(db.String(50), nullable=False)
 
     __mapper_args__ = {
         'polymorphic_identity':'answers',

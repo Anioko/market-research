@@ -3,7 +3,7 @@ from .. import db
 from datetime import datetime
 from logging import log
 from time import time
-from question import Answer, Question
+from .question import Answer, Question
 
 
 class StripeData(db.Model):
@@ -119,15 +119,15 @@ class Project(db.Model):
     currency = db.Column(db.String(150))
 
     questions = db.relationship("Question", backref="project", lazy="dynamic")
-    multiple_choice_questions = db.relationship(
-        "MultipleChoiceQuestion", backref="project", lazy="dynamic"
-    )
-    scale_questions = db.relationship(
-        "ScaleQuestion", backref="project", lazy="dynamic"
-    )
-    screener_questions = db.relationship(
-        "ScreenerQuestion", backref="project", lazy="dynamic"
-    )
+    #multiple_choice_questions = db.relationship(
+    #    "MultipleChoiceQuestion", backref="project", lazy="dynamic"
+    #)
+    #scale_questions = db.relationship(
+    #    "ScaleQuestion", backref="project", lazy="dynamic"
+    #)
+    #screener_questions = db.relationship(
+    #    "ScreenerQuestion", backref="project", lazy="dynamic"
+    #)
 
     @property
     def org_name(self):
@@ -159,39 +159,24 @@ class LineItem(db.Model):
     )
 
 
-class ScreenerQuestion(db.Model):
+class ScreenerQuestion(Question):
     __tablename__ = "screener_questions"
-    id = Column(ForeignKey("questions.id"), primary_key=True)
+    id = db.Column(db.ForeignKey("questions.id"), primary_key=True)
     required_answer = db.Column(db.String(64), index=True)
     answer_option_one = db.Column(db.String(64), index=True)
     answer_option_two = db.Column(db.String(64), index=True)
     answer_option_three = db.Column(db.String(64), index=True)
-
+    created_at = db.Column(db.DateTime, index=True, default=db.func.now())
+    updated_at = db.Column(db.DateTime, nullable=True)
     screener_answers = db.relationship(
         "ScreenerAnswer", backref="screenerquestion", lazy="dynamic"
     )
 
-    def __init__(
-        self,
-        project_id,
-        question_id,
-        user_id,
-        required_answer,
-        answer_option_one,
-        answer_option_two,
-        answer_option_three,
-        question,
-        description,
-    ):
-        self.question_id = question_id
-        self.user_id = user_id
-        self.required_answer = required_answer
-        self.answer_option_one = answer_option_one
-        self.answer_option_two = answer_option_two
-        self.answer_option_three = answer_option_three
+    __mapper_args__ = {"polymorphic_identity": "screener_question"}
+
 
     def __repr__(self):
-        return " [ScreenerQuestion {}]".format(self.answer_option_one)
+        return "ScreenerQuestion id:{}".format(self.id)
 
 
 class ScreenerAnswer(db.Model):
@@ -205,9 +190,9 @@ class ScreenerAnswer(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
 
 
-class MultipleChoiceQuestion(db.Model):
+class MultipleChoiceQuestion(Question):
     __tablename__ = "multiple_choice_questions"
-    id = Column(ForeignKey("questions.id"), primary_key=True)
+    id = db.Column(db.ForeignKey("questions.id"), primary_key=True)
     multiple_choice_option_one = db.Column(db.String(64), index=True)
     multiple_choice_option_two = db.Column(db.String(64), index=True)
     multiple_choice_option_three = db.Column(db.String(64), index=True)
@@ -217,6 +202,8 @@ class MultipleChoiceQuestion(db.Model):
     multiple_choice_answers = db.relationship(
         "MultipleChoiceAnswer", backref="multiplechoicequestion", lazy="dynamic"
     )
+    created_at = db.Column(db.DateTime, index=True, default=db.func.now())
+    updated_at = db.Column(db.DateTime, nullable=True)
     __mapper_args__ = {"polymorphic_identity": "multiple_choice_questions"}
 
 
@@ -239,13 +226,16 @@ class MultipleChoiceAnswer(db.Model):
 
 class ScaleQuestion(Question):
     __tablename__ = "scale_questions"
-    id = Column(ForeignKey("questions.id"), primary_key=True)
-    __mapper_args__ = {"polymorphic_identity": "scale_questions"}
+    id = db.Column(db.ForeignKey("questions.id"), primary_key=True)
 
     options = db.Column(db.String(64), index=True)
     scale_answers = db.relationship(
         "ScaleAnswer", backref="scalequestion", lazy="dynamic"
     )
+    created_at = db.Column(db.DateTime, index=True, default=db.func.now())
+    updated_at = db.Column(db.DateTime, nullable=True)
+    __mapper_args__ = {"polymorphic_identity": "scale_questions"}
+
 
 
 class ScaleAnswer(db.Model):
