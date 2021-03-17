@@ -234,17 +234,20 @@ def project_details(org_id, project_id, name):
             .filter(project_id == project_id)
             .first()
         )
-        lineitems_1 = LineItem(
-            project_id=project_item.id,
-            quantity=project_item.order_quantity,
-            currency=project_item.currency,
-            service_type=project_item.service_type,
-            unit_amount=unit_amount,
-            name=project_item.name,
-            user_id=current_user.id,
-        )
-        db.session.add(lineitems_1)
-        db.session.commit()
+        line_item_exists = LineItem.query.filter_by(project_id=project_item.id).first()
+
+        if not line_item_exists:
+            lineitems_1 = LineItem(
+                project_id=project_item.id,
+                quantity=project_item.order_quantity,
+                currency=project_item.currency,
+                service_type=project_item.service_type,
+                unit_amount=unit_amount,
+                name=project_item.name,
+                user_id=current_user.id,
+            )
+            db.session.add(lineitems_1)
+            db.session.commit()
 
         return redirect(
             url_for(
@@ -325,6 +328,9 @@ def order_details(org_id, project_id, name):
         .filter(Project.id == project_id)
         .first()
     )
+    paid_project = PaidProject.query.filter_by(project_id=project_item.id).first()
+    project_is_paid = True if paid_project else False
+    print(project_is_paid)
     count_order = (
         Order.query.filter_by(user_id=current_user.id)
         .filter(project_id == project_id)
@@ -346,6 +352,7 @@ def order_details(org_id, project_id, name):
         count_screener_questions=count_screener_questions,
         count_questions=count_questions,
         order=order,
+        is_paid=paid_project,
         today=today,
     )
 

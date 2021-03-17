@@ -149,7 +149,7 @@ def thanks(line_item_id, project_id):
                 project_id=project_id,
                 order_id=order.id,
                 project_name=project.name,
-                question=question.question,
+                question=question.title,
                 description=question.description,
                 question_type="Screener",
             )
