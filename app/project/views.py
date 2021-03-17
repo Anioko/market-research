@@ -65,20 +65,13 @@ def index():
     questions_poly = with_polymorphic(
         Question, [ScreenerQuestion, ScaleQuestion, MultipleChoiceQuestion]
     )
-    count_questions = (
-        db.session.query(questions_poly)
-        .filter_by(user_id=current_user.id)
-        .filter(Question.project_id == Project.id)
-        .count()
-    )
+
     # count_questions = Question.query.filter_by(user_id=current_user.id).filter(Question.project_id == Project.id).count()
     return render_template(
         "project/project_dashboard.html",
         project=project,
         org=org,
-        question=question,
         count_screener_questions=count_screener_questions,
-        count_questions=count_questions,
     )
 
 
@@ -152,7 +145,7 @@ def project_details(org_id, project_id, name):
         .all()
     )
     multiple_choice_question = (
- db.session.query(Question)
+        db.session.query(Question)
         .filter_by(user_id=current_user.id)
         .filter_by(project_id=project_id)
         .filter_by(question_type=QuestionTypes.MultipleChoiceQuestion.value)
@@ -176,7 +169,12 @@ def project_details(org_id, project_id, name):
     count_screener_questions = len(screener_question)
 
     # count_questions = Question.query.filter_by(user_id=current_user.id).filter(project_id == project_id).count()
-    count_questions = 0
+    count_questions = (
+        db.session.query(Question)
+        .filter_by(user_id=current_user.id)
+        .filter(Question.project_id == Project.id)
+        .count()
+    )
 
     ## prepare line items
     project_item = (

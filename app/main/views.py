@@ -18,9 +18,13 @@ from flask_login import current_user, login_required
 from app import db
 from app.models import EditableHTML, Project, Organisation, Order, User, Question, ScaleQuestion, LineItem, PaidProject, MultipleChoiceQuestion, ScreenerQuestion
 from app.main.forms import AddOrderForm
+from app.constants import QuestionTypes
+
 import stripe
 import os
 from sqlalchemy import func, desc
+from sqlalchemy.orm import with_polymorphic
+
 from app.decorators import admin_required, respondent_required
 
 main = Blueprint('main', __name__)
@@ -96,9 +100,20 @@ def stripe_pay():
 
 @main.route('/thanks/<line_item_id>/<project_id>')
 def thanks(line_item_id, project_id ):
+    screener_questions_poly = with_polymorphic(Question, [ScreenerQuestion])
+    scale_questions_poly = with_polymorphic(Question, [ScaleQuestion])
+    mc_questions_poly = with_polymorphic(Question, [MultipleChoiceQuestion])
+
     order = Order.query.filter_by(user_id=current_user.id).first()
     project = Project.query.filter_by(user_id=current_user.id, id=project_id).first()
-    screener_question = ScreenerQuestion.query.filter_by(user_id=current_user.id, project_id=project_id).all()
+    #screener_question = ScreenerQuestion.query.filter_by(user_id=current_user.id, project_id=project_id).all()
+    screener_question = (
+        db.session.query(Question)
+        .filter_by(user_id=current_user.id)
+        .filter_by(project_id=project_id)
+        .filter_by(question_type=QuestionTypes.ScreenerQuestion.value)
+        .all()
+    )
     for question in screener_question:
         if question:
             screener = PaidProject(
@@ -108,17 +123,31 @@ def thanks(line_item_id, project_id ):
                 )
             db.session.add(screener)
         
-    scale_question = ScaleQuestion.query.filter_by(user_id=current_user.id, project_id=project_id).all()
+    #scale_question = ScaleQuestion.query.filter_by(user_id=current_user.id, project_id=project_id).all()
+    scale_question = (
+        db.session.query(Question)
+        .filter_by(user_id=current_user.id)
+        .filter_by(project_id=project_id)
+        .filter_by(question_type=QuestionTypes.ScaleQuestion.value)
+        .all()
+    )
     for question in scale_question:
         if question:
             scale = PaidProject(
                 project_id=project_id, order_id=order.id, project_name=project.name,
                 question = question.title, question_type="Scale",
-                description=question.description, answer_option_one=question.answer_option_one
+                description=question.description,
                 )
             db.session.add(scale)
 
-    multiple_choice_question = MultipleChoiceQuestion.query.filter_by(user_id=current_user.id, project_id=project_id).all()
+    # multiple_choice_question = MultipleChoiceQuestion.query.filter_by(user_id=current_user.id, project_id=project_id).all()
+    multiple_choice_question = (
+        db.session.query(Question)
+        .filter_by(user_id=current_user.id)
+        .filter_by(project_id=project_id)
+        .filter_by(question_type=QuestionTypes.MultipleChoiceQuestion.value)
+        .all()
+    )
     for question in multiple_choice_question:
         if question:               
             multi = PaidProject(
