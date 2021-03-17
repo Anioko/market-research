@@ -217,7 +217,7 @@ class EditQuestionForm(FlaskForm):
 
 
 class AddScreenerQuestionForm(FlaskForm):
-    question = StringField(
+    title = StringField(
         "Screener Question Title E.g Do you eat pancakes?",
         validators=[InputRequired(), Length(1, 90)],
     )

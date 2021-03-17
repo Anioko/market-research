@@ -255,8 +255,6 @@ def project_details(org_id, project_id, name):
             )
         )
 
-    print(screener_question)
-
     return render_template(
         "project/project_details.html",
         screener_question=screener_question,

@@ -432,11 +432,11 @@ def question_details(project_id, name):
 
 
 @question.route(
-    "/<org_id>/<project_id>/<int:question_id>/<question>/scr/edit/",
-    methods=["Get", "POST"],
+    "/<org_id>/<project_id>/<int:question_id>/scr/edit/",
+    methods=["GET", "POST"],
 )
 @login_required
-def edit_screener_question(org_id, project_id, question_id, question):
+def edit_screener_question(org_id, project_id, question_id):
 
     org = (
         Organisation.query.filter_by(user_id=current_user.id)
