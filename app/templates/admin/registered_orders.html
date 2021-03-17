@@ -8,7 +8,7 @@
                 Back to dashboard
             </a>
             <h2 class="ui header">
-                Registered Users ({{ orders_count }})
+                Registered Orders ({{ orders_count }})
                 <div class="sub header">
                     View and manage currently registered orders.
                 </div>
@@ -41,22 +41,22 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {% for u in orders.items  %}
+                    {% for order in orders.items  %}
                         <tr>
 
-                            <td>{{ u.organisation_id}}</td>
-                            <td>{{ u.project_id }}</td>
-                            <td>{{ u.line_item_id }}</td>
-                            <td>{{ u.user_id }}</td>
-                            <td>{{ u.currency }}</td>
-                            <td>{{ u.payment_method }}</td>
-                            <td>{{ u.total_amount }}</td>
-                            <td>{{ u.start_date }}</td>
+                            <td>{{ order.organisation_id}}</td>
+                            <td>{{ order.project_id }}</td>
+                            <td>{{ order.line_item_id }}</td>
+                            <td>{{ order.user_id }}</td>
+                            <td>{{ order.currency }}</td>
+                            <td>{{ order.payment_method }}</td>
+                            <td>{{ order.total_amount }}</td>
+                            <td>{{ order.start_date }}</td>
 							<td>
-                                {% if u.delivered %}
-                                <a class="ui red button" href="{{ url_for('admin.toggle_user_respondent', user_id=u.id) }}">Delivered</a>
+                                {% if order.delivered %}
+                                <a class="ui red button" href="{{ url_for('admin.toggle_user_respondent', user_id=order.user_id) }}">Delivered</a>
                                 {% else %}
-                                <a class="ui green button" href="{{ url_for('admin.toggle_user_respondent', user_id=u.id) }}">Make Respondent</a>
+                                <a class="ui green button" href="{{ url_for('admin.toggle_user_respondent', user_id=order.user_id) }}">Make Respondent</a>
                                 {% endif %}
 
 							</td>

@@ -20,6 +20,7 @@ def permission_required(permission):
 
     return decorator
 
+
 def respondent_required(f):
     def decorator(f):
         @wraps(f)
@@ -31,6 +32,7 @@ def respondent_required(f):
         return decorated_function
 
     return decorator(f)
+
 
 def admin_required(f):
     return permission_required(Permission.ADMINISTER)(f)

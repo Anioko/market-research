@@ -119,15 +119,15 @@ class Project(db.Model):
     currency = db.Column(db.String(150))
 
     questions = db.relationship("Question", backref="project", lazy="dynamic")
-    #multiple_choice_questions = db.relationship(
+    # multiple_choice_questions = db.relationship(
     #    "MultipleChoiceQuestion", backref="project", lazy="dynamic"
-    #)
-    #scale_questions = db.relationship(
+    # )
+    # scale_questions = db.relationship(
     #    "ScaleQuestion", backref="project", lazy="dynamic"
-    #)
-    #screener_questions = db.relationship(
+    # )
+    # screener_questions = db.relationship(
     #    "ScreenerQuestion", backref="project", lazy="dynamic"
-    #)
+    # )
 
     @property
     def org_name(self):
@@ -174,7 +174,6 @@ class ScreenerQuestion(Question):
 
     __mapper_args__ = {"polymorphic_identity": "screener_question"}
 
-
     def __repr__(self):
         return "ScreenerQuestion id:{}".format(self.id)
 
@@ -207,7 +206,6 @@ class MultipleChoiceQuestion(Question):
     __mapper_args__ = {"polymorphic_identity": "multiple_choice_questions"}
 
 
-
 class MultipleChoiceAnswer(db.Model):
     __tablename__ = "multiple_choice_answers"
     id = db.Column(db.Integer, primary_key=True)
@@ -235,7 +233,6 @@ class ScaleQuestion(Question):
     created_at = db.Column(db.DateTime, index=True, default=db.func.now())
     updated_at = db.Column(db.DateTime, nullable=True)
     __mapper_args__ = {"polymorphic_identity": "scale_questions"}
-
 
 
 class ScaleAnswer(db.Model):

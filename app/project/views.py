@@ -136,7 +136,7 @@ def project_details(org_id, project_id, name):
         .filter_by(question_type=QuestionTypes.ScreenerQuestion.value)
         .all()
     )
-    
+
     scale_question = (
         db.session.query(Question)
         .filter_by(user_id=current_user.id)
