@@ -86,46 +86,46 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for u in screener_question %}
+                    {% for sq in screener_question %}
                         <tr>
-                            <td>{{ u.question }}</td>
-							<td>{{ u.description }}</td>
+                            <td>{{ sq.title }}</td>
+							<td>{{ sq.description }}</td>
 							<td></td>
 							<td></td>
 							<td></td>
 							<td></td>
 							<td></td>
                             <td>
-                                <a class="ui blue left floated button" href="{{ url_for('question.edit_screener_question', question_id=u.id, question=u.question, project_id=u.project_id, org_id=org.id) }}">Edit</a>            
+                                <a class="ui blue left floated button" href="{{ url_for('question.edit_screener_question', question_id=sq.id, question=sq.question, project_id=sq.project_id, org_id=org.id) }}">Edit</a>            
                             </td>
                         </tr>
                     {% endfor %}
 
-                    {% for u in scale_question %}
+                    {% for sc in scale_question %}
                         <tr>
-                            <td>{{ u.title }}</td>
-							<td>{{ u.description }}</td>
-							<td>{{ u.option_one }}</td>
-							<td>{{ u.option_two }}</td>
-							<td>{{ u.option_three }}</td>
-							<td>{{ u.option_four }}</td>
-							<td>{{ u.option_five }}</td>
+                            <td>{{ sc.title }}</td>
+							<td>{{ sc.description }}</td>
+							<td>{{ sc.option_one }}</td>
+							<td>{{ sc.option_two }}</td>
+							<td>{{ sc.option_three }}</td>
+							<td>{{ sc.option_four }}</td>
+							<td>{{ sc.option_five }}</td>
                             <td>
-                                <a class="ui blue left floated button" href="{{ url_for('question.edit_scale_question', question_id=u.id, question=u.title, project_id=u.project_id, org_id=org.id) }}">Edit</a>            
+                                <a class="ui blue left floated button" href="{{ url_for('question.edit_scale_question', question_id=sc.id, question=sc.title, project_id=sc.project_id, org_id=org.id) }}">Edit</a>            
                             </td>
                         </tr>
                     {% endfor %}
-                    {% for u in multiple_choice_question %}
+                    {% for mcq in multiple_choice_question %}
                         <tr>
-                            <td>{{ u.title }}</td>
-							<td>{{ u.description }}</td>
-							<td>{{ u.multiple_choice_option_one }}</td>
-							<td>{{ u.multiple_choice_option_two }}</td>
-							<td>{{ u.multiple_choice_option_three }}</td>
-							<td>{{ u.multiple_choice_option_four }}</td>
-							<td>{{ u.multiple_choice_option_five }}</td>
+                            <td>{{ mcq.title }}</td>
+							<td>{{ mcq.description }}</td>
+							<td>{{ mcq.multiple_choice_option_one }}</td>
+							<td>{{ mcq.multiple_choice_option_two }}</td>
+							<td>{{ mcq.multiple_choice_option_three }}</td>
+							<td>{{ mcq.multiple_choice_option_four }}</td>
+							<td>{{ mcq.multiple_choice_option_five }}</td>
                             <td>
-                                <a class="ui blue left floated button" href="{{ url_for('question.edit_multiple_choice_question', question_id=u.id, question=u.title, project_id=u.project_id, org_id=org.id) }}">Edit</a>            
+                                <a class="ui blue left floated button" href="{{ url_for('question.edit_multiple_choice_question', question_id=mcq.id, question=mcq.title, project_id=mcq.project_id, org_id=org.id) }}">Edit</a>            
                             </td>
                         </tr>
                     {% endfor %}

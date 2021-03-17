@@ -225,16 +225,6 @@ def new_scale_question(org_id, project_id):
             user_id=current_user.id,
         )
         db.session.add(appt)
-
-        appts = Question(
-            project_id=project_id,
-            organisation_id=org_id,
-            title=form.title.data,
-            description=form.description.data,
-            question_type="Scale questions",
-            user_id=current_user.id,
-        )
-        db.session.add(appts)
         project = Project.query.filter(Project.id == project_id).first()
         db.session.commit()
         flash("Successfully created".format(appt.title), "form-success")

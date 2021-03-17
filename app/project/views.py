@@ -172,9 +172,10 @@ def project_details(org_id, project_id, name):
     count_questions = (
         db.session.query(Question)
         .filter_by(user_id=current_user.id)
-        .filter(Question.project_id == Project.id)
+        .filter_by(project_id=project_id)
         .count()
     )
+    print(f"Project ID: {project_id}, Count Questions: {count_questions} ")
 
     ## prepare line items
     project_item = (
