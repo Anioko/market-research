@@ -1,8 +1,9 @@
 import os
 import sys
-
+from dotenv import load_dotenv
 from raygun4py.middleware import flask as flask_raygun
 
+load_dotenv()
 PYTHON_VERSION = sys.version_info[0]
 if PYTHON_VERSION == 3:
     import urllib.parse
@@ -92,7 +93,7 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     ASSETS_DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://wilfred:weezybaby@localhost:5432/marketresearch'
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI")
     #os.environ.get('DEV_DATABASE_URL',
         #'sqlite:///' + os.path.join(basedir, 'data-dev.sqlite'))
 

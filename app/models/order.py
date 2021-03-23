@@ -178,15 +178,16 @@ class ScreenerQuestion(Question):
         return "ScreenerQuestion id:{}".format(self.id)
 
 
-class ScreenerAnswer(db.Model):
+class ScreenerAnswer(Answer):
     __tablename__ = "screener_answers"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.ForeignKey("answers.id"), primary_key=True)
     answer_option_one = db.Column(db.String(64), index=True)
     project_id = db.Column(db.Integer, db.ForeignKey("project.id", ondelete="CASCADE"))
     screener_questions_id = db.Column(
         db.Integer, db.ForeignKey("screener_questions.id", ondelete="CASCADE")
     )
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
+    __mapper_args__ = {"polymorphic_identity": "screener_answers"}
 
 
 class MultipleChoiceQuestion(Question):
@@ -206,9 +207,9 @@ class MultipleChoiceQuestion(Question):
     __mapper_args__ = {"polymorphic_identity": "multiple_choice_questions"}
 
 
-class MultipleChoiceAnswer(db.Model):
+class MultipleChoiceAnswer(Answer):
     __tablename__ = "multiple_choice_answers"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.ForeignKey("answers.id"), primary_key=True)
     multiple_choice_answer_one = db.Column(db.String(64), index=True)
     multiple_choice_answer_two = db.Column(db.String(64), index=True)
     multiple_choice_answer_three = db.Column(db.String(64), index=True)
@@ -220,6 +221,7 @@ class MultipleChoiceAnswer(db.Model):
     )
     project_id = db.Column(db.Integer, db.ForeignKey("project.id", ondelete="CASCADE"))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
+    __mapper_args__ = {"polymorphic_identity": "multiple_choice_answers"}
 
 
 class ScaleQuestion(Question):
@@ -237,7 +239,7 @@ class ScaleQuestion(Question):
 
 class ScaleAnswer(db.Model):
     __tablename__ = "scale_answers"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.ForeignKey("answers.id"), primary_key=True)
     scale_question_id = db.Column(
         db.Integer, db.ForeignKey("scale_questions.id", ondelete="CASCADE")
     )
@@ -247,3 +249,4 @@ class ScaleAnswer(db.Model):
     # project = db.relationship('Project', backref='scale')
     project_id = db.Column(db.Integer, db.ForeignKey("project.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
+    __mapper_args__ = {"polymorphic_identity": "scale_answers"}

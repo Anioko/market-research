@@ -71,18 +71,13 @@ class Answer(db.Model):
     location_state = db.Column(db.String, index=True)
     location_ip_address = db.Column(db.String, index=True)
 
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
-    scale_questions_id = db.Column(db.Integer, db.ForeignKey("scale_questions.id"))
-    multiple_choice_questions_id = db.Column(
-        db.Integer, db.ForeignKey("multiple_choice_questions.id")
-    )
-    respondent = db.relationship("User")
-
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
     answer_type = db.Column(db.String(50), nullable=False)
 
-    __mapper_args__ = {"polymorphic_identity": "answers", "polymorphic_on": answer_type}
+    __mapper_args__ = {
+        "polymorphic_identity": "answers",
+         "polymorphic_on": answer_type}
 
     """ multiple_choice_answer_one = db.Column(db.String(64), index=True)
         multiple_choice_answer_two = db.Column(db.String(64), index=True)

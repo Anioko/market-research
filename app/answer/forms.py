@@ -28,8 +28,8 @@ class AddScreenerAnswerForm(FlaskForm):
     submit = SubmitField("Submit")
 
 
-def screener_query():
-    return ScreenerQuestion.query
+    def screener_query():
+        return ScreenerQuestion.query
 
 
 class TestAnswerForm(FlaskForm):

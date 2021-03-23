@@ -401,8 +401,6 @@ def question_details(project_id, name):
     """ display all the questions for a project which has been paid for """
     project = db.session.query(Project).filter_by(id=project_id).first()
     questions = PaidProject.query.filter_by(project_id=project_id).all()
-    for question in questions:
-        question = question
 
     return render_template(
         "question/question_details.html", question=question, project=project

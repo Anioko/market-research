@@ -291,6 +291,7 @@ def join_from_invite(user_id, token):
         )
     return redirect(url_for("main.index"))
 
+
 """
 @account.before_app_request
 def before_request():
