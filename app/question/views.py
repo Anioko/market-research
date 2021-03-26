@@ -159,7 +159,7 @@ def new_screener_question(org_id, project_id):
     if form.validate_on_submit():
         appt = ScreenerQuestion(
             project_id=project.id,
-            title=form.question.data,
+            title=form.title.data,
             description=form.description.data,
             required_answer=form.required_answer.data,
             answer_option_one=form.answer_option_one.data,
