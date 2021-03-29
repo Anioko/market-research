@@ -525,7 +525,7 @@ def edit_scale_question(org_id, project_id, question_id, question):
             )
         )
     return render_template(
-        "question/create_scale_question.html", question=question, form=form
+        "question/create_scale_question.html", question=question,project_id=project_id, org_id=org_id, form=form, project_name=project.name
     )
 
 
@@ -572,7 +572,7 @@ def edit_multiple_choice_question(org_id, project_id, question_id, question):
             )
         )
     return render_template(
-        "question/create_multiple_choice_question.html", question=question, form=form
+        "question/create_multiple_choice_question.html", question=question, project_id=project_id, form=form
     )
 
 
