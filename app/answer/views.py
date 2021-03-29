@@ -26,9 +26,11 @@ answer = Blueprint("answer", __name__)
 @answer.route("/<int:project_id>/<int:question_id>/add/", methods=["GET", "POST"])
 @login_required
 def add_screener_answer(project_id, question_id):
-    screener_question = db.session.query(ScreenerQuestion).filter_by(id=question_id).first()
+    screener_question = (
+        db.session.query(ScreenerQuestion).filter_by(id=question_id).first()
+    )
     form = AddScreenerAnswerForm()
-        
+
     if request.method == "POST":
         project = db.session.query(Project).filter_by(id=project_id).first()
         # questions = PaidProject.query.filter_by(project_id=project_id).all()
@@ -55,7 +57,9 @@ def add_screener_answer(project_id, question_id):
         if answer.answer_option_one == screener_question.required_answer:
             return redirect(
                 url_for(
-                    "question.question_details", project_id=project.id, name=project.name
+                    "question.question_details",
+                    project_id=project.id,
+                    name=project.name,
                 )
             )
         else:

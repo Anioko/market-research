@@ -55,11 +55,12 @@ def index(org_id):
         .first_or_404()
     )
 
-    project = (db.session.query(Project)
-                .filter_by(user_id=current_user.id)
-                .filter_by(organisation_id=org_id)
-                .all()
-            )
+    project = (
+        db.session.query(Project)
+        .filter_by(user_id=current_user.id)
+        .filter_by(organisation_id=org_id)
+        .all()
+    )
     # question = db.session.query(Question).filter_by(user_id=current_user.id).filter(Question.project_id==Project.id).all()
     count_screener_questions = (
         db.session.query(func.count(ScreenerQuestion.id))

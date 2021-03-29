@@ -75,9 +75,7 @@ class Answer(db.Model):
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
     answer_type = db.Column(db.String(50), nullable=False)
 
-    __mapper_args__ = {
-        "polymorphic_identity": "answers",
-         "polymorphic_on": answer_type}
+    __mapper_args__ = {"polymorphic_identity": "answers", "polymorphic_on": answer_type}
 
     """ multiple_choice_answer_one = db.Column(db.String(64), index=True)
         multiple_choice_answer_two = db.Column(db.String(64), index=True)

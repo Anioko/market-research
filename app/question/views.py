@@ -185,7 +185,13 @@ def new_screener_question(org_id, project_id):
         # question_id=appt.id, name=appt.name))
     else:
         flash("ERROR! Data was not added.", "error")
-    return render_template("question/create_screener_question.html", form=form, project_id=project_id, project_name=project.name, org_id=org_id)
+    return render_template(
+        "question/create_screener_question.html",
+        form=form,
+        project_id=project_id,
+        project_name=project.name,
+        org_id=org_id,
+    )
 
 
 @question.route("/<org_id>/<project_id>/scl/create/", methods=["Get", "POST"])
@@ -242,7 +248,13 @@ def new_scale_question(org_id, project_id):
         # question_id=appt.id, name=appt.name))
     else:
         flash("ERROR! Data was not added.", "error")
-    return render_template("question/create_scale_question.html", form=form, project_id=project_id, project_name=project.name, org_id=org_id)
+    return render_template(
+        "question/create_scale_question.html",
+        form=form,
+        project_id=project_id,
+        project_name=project.name,
+        org_id=org_id,
+    )
 
 
 @question.route("/<project_id>/<question_id>/scl/create/", methods=["Get", "POST"])
@@ -381,7 +393,13 @@ def new_multiple_choice_question(org_id, project_id):
         # question_id=appt.id, name=appt.name))
     else:
         flash("ERROR! Data was not added.", "error")
-    return render_template("question/create_multiple_choice_question.html", form=form, project_id=project_id, project_name=project.name, org_id=org_id)
+    return render_template(
+        "question/create_multiple_choice_question.html",
+        form=form,
+        project_id=project_id,
+        project_name=project.name,
+        org_id=org_id,
+    )
 
 
 @question.route("/<int:project_id>/<name>/")
@@ -390,8 +408,10 @@ def question_details(project_id, name):
     project = db.session.query(Project).filter_by(id=project_id).first()
     questions = PaidProject.query.filter_by(project_id=project_id).all()
 
+
+    print(questions)
     return render_template(
-        "question/question_details.html", question=question, project=project
+        "question/question_details.html", question=questions, project=project
     )
 
 
@@ -525,7 +545,12 @@ def edit_scale_question(org_id, project_id, question_id, question):
             )
         )
     return render_template(
-        "question/create_scale_question.html", question=question,project_id=project_id, org_id=org_id, form=form, project_name=project.name
+        "question/create_scale_question.html",
+        question=question,
+        project_id=project_id,
+        org_id=org_id,
+        form=form,
+        project_name=project.name,
     )
 
 
@@ -572,7 +597,10 @@ def edit_multiple_choice_question(org_id, project_id, question_id, question):
             )
         )
     return render_template(
-        "question/create_multiple_choice_question.html", question=question, project_id=project_id, form=form
+        "question/create_multiple_choice_question.html",
+        question=question,
+        project_id=project_id,
+        form=form,
     )
 
 
