@@ -143,12 +143,13 @@ def new_screener_question(org_id, project_id):
     question = (
         db.session.query(screener_questions_poly)
         .filter_by(user_id=current_user.id)
-        .filter(project_id == project_id)
+        .filter_by(project_id=project_id)
+        .filter_by(organisation_id=org_id)
         .first()
     )
     if question is not None:
         flash("Not allowed! You can only add one screener question.", "error")
-        return redirect(url_for("project.index"))
+        return redirect(url_for("project.index", org_id=org_id))
     q = (
         db.session.query(Question)
         .filter_by(user_id=current_user.id)
@@ -184,7 +185,7 @@ def new_screener_question(org_id, project_id):
         # question_id=appt.id, name=appt.name))
     else:
         flash("ERROR! Data was not added.", "error")
-    return render_template("question/create_screener_question.html", form=form)
+    return render_template("question/create_screener_question.html", form=form, project_id=project_id, project_name=project.name, org_id=org_id)
 
 
 @question.route("/<org_id>/<project_id>/scl/create/", methods=["Get", "POST"])
@@ -195,6 +196,8 @@ def new_scale_question(org_id, project_id):
         .filter_by(id=org_id)
         .first()
     )
+    project = Project.query.filter(Project.id == project_id).first()
+
     question = (
         db.session.query(Question)
         .filter_by(user_id=current_user.id)
@@ -225,7 +228,6 @@ def new_scale_question(org_id, project_id):
             user_id=current_user.id,
         )
         db.session.add(appt)
-        project = Project.query.filter(Project.id == project_id).first()
         db.session.commit()
         flash("Successfully created".format(appt.title), "form-success")
         return redirect(
@@ -240,7 +242,7 @@ def new_scale_question(org_id, project_id):
         # question_id=appt.id, name=appt.name))
     else:
         flash("ERROR! Data was not added.", "error")
-    return render_template("question/create_scale_question.html", form=form)
+    return render_template("question/create_scale_question.html", form=form, project_id=project_id, project_name=project.name, org_id=org_id)
 
 
 @question.route("/<project_id>/<question_id>/scl/create/", methods=["Get", "POST"])
@@ -330,6 +332,8 @@ def new_multiple_choice_question(org_id, project_id):
         .filter_by(id=org_id)
         .first()
     )
+    project = Project.query.filter(Project.id == project_id).first()
+
     if question is None:
         flash("Not allowed! You can have to start with a sceener question.", "error")
         return redirect(
@@ -362,22 +366,6 @@ def new_multiple_choice_question(org_id, project_id):
             user_id=current_user.id,
         )
         db.session.add(appt)
-        """appts = Question(
-            project_id = project_id,
-            title=form.title.data,
-            description=form.description.data,
-            question_type="Multiple choice questions",
-
-            multiple_choice_option_one = form.multiple_choice_option_one.data,
-            multiple_choice_option_two = form.multiple_choice_option_two.data,
-            multiple_choice_option_three = form.multiple_choice_option_three.data,
-            multiple_choice_option_four = form.multiple_choice_option_four.data,
-            multiple_choice_option_five = form.multiple_choice_option_five.data,
-            
-            user_id=current_user.id
-            )
-        db.session.add(appts)"""
-        project = Project.query.filter(Project.id == project_id).first()
         db.session.commit()
         flash("Successfully created".format(appt.title), "form-success")
         return redirect(
@@ -393,7 +381,7 @@ def new_multiple_choice_question(org_id, project_id):
         # question_id=appt.id, name=appt.name))
     else:
         flash("ERROR! Data was not added.", "error")
-    return render_template("question/create_multiple_choice_question.html", form=form)
+    return render_template("question/create_multiple_choice_question.html", form=form, project_id=project_id, project_name=project.name, org_id=org_id)
 
 
 @question.route("/<int:project_id>/<name>/")

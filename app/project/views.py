@@ -27,9 +27,9 @@ from datetime import date
 project = Blueprint("project", __name__)
 
 
-@project.route("/")
+@project.route("/<int:org_id>")
 @login_required
-def index():
+def index(org_id):
     """project dashboard page."""
     check_point_org = (
         Organisation.query.filter_by(user_id=current_user.id)
@@ -37,7 +37,7 @@ def index():
         .first()
     )
     if check_point_org is None:
-        flash(" You now need to add details of your organization.", "error")
+        flash(" You now need to add details of your organisation.", "error")
         return redirect(url_for("organisations.org_home"))
 
     check_point_project = (
@@ -55,7 +55,11 @@ def index():
         .first_or_404()
     )
 
-    project = db.session.query(Project).filter_by(user_id=current_user.id).all()
+    project = (db.session.query(Project)
+                .filter_by(user_id=current_user.id)
+                .filter_by(organisation_id=org_id)
+                .all()
+            )
     # question = db.session.query(Question).filter_by(user_id=current_user.id).filter(Question.project_id==Project.id).all()
     count_screener_questions = (
         db.session.query(func.count(ScreenerQuestion.id))
@@ -98,7 +102,7 @@ def new_project(org_id):
         db.session.add(appt)
         db.session.commit()
         flash("Successfully created".format(appt.name), "form-success")
-        return redirect(url_for("project.index"))
+        return redirect(url_for("project.index", org_id=org_id))
 
         # return redirect(url_for('project.project_details',
         # project_id=appt.id, name=appt.name))
@@ -117,7 +121,8 @@ def project_details(org_id, project_id, name):
     check_point = (
         db.session.query(screener_questions_poly)
         .filter_by(user_id=current_user.id)
-        .filter(project_id == project_id)
+        .filter_by(project_id=project_id)
+        .filter_by(organisation_id=org_id)
         .count()
     )
     if check_point is None:
@@ -160,11 +165,10 @@ def project_details(org_id, project_id, name):
     project = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
-        .filter(Project.id == project_id)
+        .filter_by(id=project_id)
         .first()
     )
 
-    project_id = project_id
     # count_screener_questions = ScreenerQuestion.query.filter_by(user_id=current_user.id).filter(project_id==project_id).first()
     count_screener_questions = len(screener_question)
 
@@ -173,6 +177,7 @@ def project_details(org_id, project_id, name):
         db.session.query(Question)
         .filter_by(user_id=current_user.id)
         .filter_by(project_id=project_id)
+        .filter_by(organisation_id=org_id)
         .count()
     )
     print(f"Project ID: {project_id}, Count Questions: {count_questions} ")
@@ -181,7 +186,7 @@ def project_details(org_id, project_id, name):
     project_item = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
-        .filter(Project.id == project_id)
+        .filter_by(id=project_id)
         .first()
     )
     ## calculate currency
@@ -212,13 +217,14 @@ def project_details(org_id, project_id, name):
         question_item = (
             db.session.query(Question)
             .filter_by(user_id=current_user.id)
-            .filter(project_id == project_id)
+            .filter_by(project_id=project_id)
             .first()
         )
         screener_question_item = (
             db.session.query(screener_questions_poly)
             .filter_by(user_id=current_user.id)
-            .filter(project_id == project_id)
+            .filter_by(project_id=project_id)
+            .filter_by(organisation_id=org_id)
             .first()
         )
 
@@ -231,7 +237,8 @@ def project_details(org_id, project_id, name):
         multiple_choice_question_item = (
             db.session.query(mc_questions_poly)
             .filter_by(user_id=current_user.id)
-            .filter(project_id == project_id)
+            .filter_by(project_id=project_id)
+            .filter_by(organisation_id=org_id)
             .first()
         )
         line_item_exists = LineItem.query.filter_by(project_id=project_item.id).first()
@@ -330,7 +337,6 @@ def order_details(org_id, project_id, name):
     )
     paid_project = PaidProject.query.filter_by(project_id=project_item.id).first()
     project_is_paid = True if paid_project else False
-    print(project_is_paid)
     count_order = (
         Order.query.filter_by(user_id=current_user.id)
         .filter(project_id == project_id)
@@ -386,21 +392,21 @@ def edit_project(org_id, project_id, name):
         db.session.add(project)
         db.session.commit()
         flash("Edited.", "success")
-        return redirect(url_for("project.index"))
+        return redirect(url_for("project.index", org_id=org_id))
     return render_template(
         "project/create_project.html", project=project, form=form, org=org, order=order
     )
 
 
-@project.route("/<project_id>/delete", methods=["GET", "POST"])
-def delete_project(project_id):
+@project.route("<project_id>/delete", methods=["GET", "POST"])
+def delete_project(org_id, project_id):
     project = (
         Project.query.filter_by(user_id=current_user.id)
         .filter_by(id=project_id)
         .first_or_404()
     )
     order = (
-        Order.query.filter_by(organisation_id=current_user.id)
+        Order.query.filter_by(organisation_id=org_id)
         .filter_by(id=project_id)
         .first_or_404()
     )
@@ -409,4 +415,4 @@ def delete_project(project_id):
     db.session.delete(project)
     db.session.commit()
     flash("Delete.", "success")
-    return redirect(url_for("project.index"))
+    return redirect(url_for("project.index", org_id=project.organisation_id))

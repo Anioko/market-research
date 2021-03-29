@@ -34,7 +34,6 @@
     {% elif current_user.is_authenticated %}
       {% set user = ([
 		  ('organisations.org_home', 'Organizations', 'building'),
-		  ('project.index', 'Projects', 'folder open')
 	  ]) %}
     {% endif %} 
     {{ render_menu_items( endpoints +  user ) }}

@@ -9,7 +9,7 @@
 {% block content %}
     <div class="ui stackable centered grid container">
         <div class="twelve wide column">
-                <a class="ui basic compact button" href="{{ url_for('project.index') }}">
+                <a class="ui basic compact button" href="{{ url_for('project.project_details', org_id=org_id, project_id=project_id, name=project_name) }}">
                 <i class="caret left icon"></i>
                 Back to Questions' List
             </a>
