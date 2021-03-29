@@ -9,7 +9,7 @@
 {% block content %}
     <div class="ui stackable centered grid container">
         <div class="twelve wide column">
-                <a class="ui basic compact button" href="{{ url_for('project.index') }}">
+                <a class="ui basic compact button" href="{{ url_for('project.index, org_id=org.id') }}">
                 <i class="caret left icon"></i>
                 Back to Questions' List
             </a>
@@ -71,9 +71,15 @@
 
 			  <h3 class="ui right floated">Total Amount: {{ order.currency }} {{ order.unit_amount }}</h3>		
 			<div class="ui divider"></div>
+			{% if is_paid %}
 			  <div class="field">
-					  <a href="#" id="buy_now_btn" class="ui teal right floated button">Pay</a>
+					  <div href="#" class="ui green right floated label">Paid </div>
 			  </div>
+			{% else %}
+				<div class="field">
+					<a href="#" id="buy_now_btn" class="ui teal right floated">pay {{order.is_paid}}</a>
+				</div>
+			{% endif %}
 		{% endif %}
     </div>
       <script src="https://js.stripe.com/v3/"></script>

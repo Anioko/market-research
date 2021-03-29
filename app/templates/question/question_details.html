@@ -19,20 +19,20 @@
                 <div class="sub header">Project's questions</div>
             </h2>
 
-			{% if question.question_type == "Screener" %}
+			{% if question.question_type == "screener_question" %}
 
-			<div class="ui segment">
-				<div class="ui right floated horizontal list">
-				  <a class="item" href="{{ url_for('answer.add_screener_answer', project_id=project.id, id=question.id, question=question.question) }}"><i class="eye icon"></i></a> 
+				<div class="ui segment">
+					<div class="ui right floated horizontal list">
+					<a class="item" href="{{ url_for('answer.add_screener_answer', project_id=project.id, id=question.id, question=question.question) }}"><i class="eye icon"></i></a> 
+					</div>
+				<h3 class="ui left floated header">Screener Question : {{ question.question }}</h3>
+				<div class="ui clearing divider"></div>
+				<h5 class="ui header">{{ question.description }}</h5>
+				{# if screener_answer #}
+				<div class="ui divider"></div>
+					<p> Answer: {# screener_answer.answer_option_one#}</p>
+					{# endif #}
 				</div>
-			  <h3 class="ui left floated header">Screener Question : {{ question.question }}</h3>
-			  <div class="ui clearing divider"></div>
-			  <h5 class="ui header">{{ question.description }}</h5>
-			  {# if screener_answer #}
-			  <div class="ui divider"></div>
-			  	<p> Answer: {# screener_answer.answer_option_one#}</p>
-				{# endif #}
-			</div>
 
 			{% endif %}
 

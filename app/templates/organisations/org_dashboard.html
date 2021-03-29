@@ -55,22 +55,22 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for u in org | sort(attribute='org_name') %}
-                        <tr onclick="window.location.href = '{{ url_for('admin.user_info', user_id=u.id) }}';">
+                    {% for og in org | sort(attribute='org_name') %}
+                        <tr onclick="window.location.href = '{{ url_for('admin.user_info', user_id=og.id) }}';">
 
-                            <td>{{ u.org_name }}</td>
-                            <td>{{ u.user.full_name() }}</td>
-                            <td>{{ u.org_city }}</td>
-                            <td>{{ u.org_state }}</td>
-                            <td>{{ u.org_country }}</td>
+                            <td>{{ og.org_name }}</td>
+                            <td>{{ og.user.full_name() }}</td>
+                            <td>{{ og.org_city }}</td>
+                            <td>{{ og.org_state }}</td>
+                            <td>{{ og.org_country }}</td>
                             <td>
-                                <a class="ui primary button" href="{{ url_for('organisations.select_org', org_id=u.id) }}">Org Details</a>
+                                <a class="ui primary button" href="{{ url_for('organisations.select_org', org_id=og.id) }}">Org Details</a>
                             </td>
                             <td>
-                                <a class="ui primary button" href="{{ url_for('project.index') }}">Project Details</a>
+                                <a class="ui primary button" href="{{ url_for('project.index',  org_id=og.id) }}">Projects</a>
                             </td>
 							<td>
-                                <a class="ui teal button" href="{{ url_for('project.new_project', org_id=u.id) }}">Create Project</a>
+                                <a class="ui teal button" href="{{ url_for('project.new_project', org_id=og.id) }}">Create Project</a>
                             </td>
                         </tr>
                     {% endfor %}
