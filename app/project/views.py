@@ -178,7 +178,6 @@ def project_details(org_id, project_id, name):
         db.session.query(Question)
         .filter_by(user_id=current_user.id)
         .filter_by(project_id=project_id)
-        .filter_by(organisation_id=org_id)
         .count()
     )
     print(f"Project ID: {project_id}, Count Questions: {count_questions} ")
@@ -310,7 +309,6 @@ def order_details(org_id, project_id, name):
         .first()
     )
 
-    project_id = project_id
     count_screener_questions = (
         ScreenerQuestion.query.filter_by(user_id=current_user.id)
         .filter(project_id == project_id)
@@ -327,13 +325,13 @@ def order_details(org_id, project_id, name):
     project_item = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
-        .filter(Project.id == project_id)
+        .filter_by(id=project_id)
         .first()
     )
     order = (
         db.session.query(LineItem)
         .filter_by(user_id=current_user.id)
-        .filter(Project.id == project_id)
+        .filter_by(project_id=project_id)
         .first()
     )
     paid_project = PaidProject.query.filter_by(project_id=project_item.id).first()
@@ -359,7 +357,7 @@ def order_details(org_id, project_id, name):
         count_screener_questions=count_screener_questions,
         count_questions=count_questions,
         order=order,
-        is_paid=paid_project,
+        is_paid=project_is_paid,
         today=today,
     )
 

@@ -42,8 +42,11 @@ def index(page):
         .filter(OrgStaff.user_id == current_user.id)
         .all()
     )
+    org_ids = [org.id for org in orgs]
+    print(org_ids)
     # question = db.session.query(Question).filter_by(user_id=current_user.id).all()
-    question = LineItem.query.paginate(page, per_page=10)
+    #question = LineItem.query.paginate(page, per_page=10)
+    question = db.session.query(PaidProject).filter(Organisation.id.in_(org_ids)).paginate(page, per_page=10)
     count = (
         db.session.query(func.count(Question.id))
         .filter_by(user_id=current_user.id)

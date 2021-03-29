@@ -28,9 +28,9 @@
                     {% for u in question.items %}
                         <tr>
                             <td>{{ u.line_item_id }}</td>
-                            <td>{{ u.project.name }}</td>
+                            <td>{{ u.project_name }}</td>
                             <td>
-                                <a class="ui blue left floated button" href="{{ url_for('question.question_details', project_id=u.project_id, name=u.project.name) }}">View Questions</a>
+                                <a class="ui blue left floated button" href="{{ url_for('question.question_details', project_id=u.project_id, name=u.project_name) }}">View Questions</a>
                             </td>
                         </tr>
                     {% endfor %}
