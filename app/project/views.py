@@ -113,6 +113,17 @@ def new_project(org_id):
     return render_template("project/create_project.html", form=form, org=org)
 
 
+@project.route("/<int:project_id>/<name>/")
+def project_questions(project_id, name):
+    """ display all the questions for a project which has been paid for """
+    project = db.session.query(Project).filter_by(id=project_id).first()
+    questions = Question.query.filter_by(project_id=project_id).all()
+
+    return render_template(
+        "question/question_details.html", questions=questions, project=project
+    )
+
+
 @project.route("/<org_id>/<int:project_id>/details/<name>/", methods=["GET", "POST"])
 def project_details(org_id, project_id, name):
     screener_questions_poly = with_polymorphic(Question, [ScreenerQuestion])

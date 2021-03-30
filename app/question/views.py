@@ -401,7 +401,7 @@ def question_details(project_id, name):
     print(len(questions))
 
     return render_template(
-        "question/question_details.html", question=questions, project=project
+        "question/question_details.html", questions=questions, project=project
     )
 
 

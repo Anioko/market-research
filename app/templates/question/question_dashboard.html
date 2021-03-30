@@ -34,7 +34,7 @@
                             <td>{{ project.id }}</td>
                             <td>{{ project.name }}</td>
                             <td>
-                                <a class="ui blue left floated button" href="{{ url_for('question.question_details', project_id=project.id, name=project.name) }}">View Questions</a>
+                                <a class="ui blue left floated button" href="{{ url_for('project.project_questions', project_id=project.id, name=project.name) }}">View Questions</a>
                             </td>
                         </tr>
                     {% endfor %}
