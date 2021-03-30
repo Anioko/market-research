@@ -27,9 +27,9 @@ from datetime import date
 project = Blueprint("project", __name__)
 
 
-@project.route("/<int:org_id>")
+@project.route("/")
 @login_required
-def index(org_id):
+def index():
     """project dashboard page."""
     check_point_org = (
         Organisation.query.filter_by(user_id=current_user.id)
@@ -58,7 +58,7 @@ def index(org_id):
     project = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
-        .filter_by(organisation_id=org_id)
+        .filter_by(organisation_id=check_point_org.id)
         .all()
     )
     # question = db.session.query(Question).filter_by(user_id=current_user.id).filter(Question.project_id==Project.id).all()
@@ -103,7 +103,7 @@ def new_project(org_id):
         db.session.add(appt)
         db.session.commit()
         flash("Successfully created".format(appt.name), "form-success")
-        return redirect(url_for("project.index", org_id=org_id))
+        return redirect(url_for("project.index"))
 
         # return redirect(url_for('project.project_details',
         # project_id=appt.id, name=appt.name))
@@ -325,6 +325,7 @@ def order_details(org_id, project_id, name):
     project_item = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
+        .filter_by(organisation_id=org_id)
         .filter_by(id=project_id)
         .first()
     )
@@ -391,7 +392,7 @@ def edit_project(org_id, project_id, name):
         db.session.add(project)
         db.session.commit()
         flash("Edited.", "success")
-        return redirect(url_for("project.index", org_id=org_id))
+        return redirect(url_for("project.index"))
     return render_template(
         "project/create_project.html", project=project, form=form, org=org, order=order
     )

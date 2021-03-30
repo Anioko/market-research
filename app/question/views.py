@@ -29,13 +29,6 @@ question = Blueprint("question", __name__)
 @login_required
 def index(page):
     """Question dashboard page."""
-    # return redirect(url_for('project.index'))
-
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=Organisation.id)
-        .first_or_404()
-    )
     orgs = (
         current_user.organisations
         + Organisation.query.join(OrgStaff, Organisation.id == OrgStaff.org_id)
@@ -43,21 +36,15 @@ def index(page):
         .all()
     )
     org_ids = [org.id for org in orgs]
-    print(org_ids)
-    # question = db.session.query(Question).filter_by(user_id=current_user.id).all()
-    #question = LineItem.query.paginate(page, per_page=10)
-    question = db.session.query(PaidProject).filter(Organisation.id.in_(org_ids)).paginate(page, per_page=10)
-    count = (
-        db.session.query(func.count(Question.id))
-        .filter_by(user_id=current_user.id)
-        .scalar()
-    )
+
+    paid_projects = db.session.query(PaidProject).filter(Organisation.id.in_(org_ids)).all()
+    project_ids = [project.id for project in paid_projects]
+
+    projects = db.session.query(Project).filter(Project.id.in_(project_ids)).paginate(page, per_page=10)
+
     return render_template(
         "question/question_dashboard.html",
-        orgs=orgs,
-        question=question,
-        org=org,
-        count=count,
+        projects=projects,
     )
 
 
@@ -152,7 +139,7 @@ def new_screener_question(org_id, project_id):
     )
     if question is not None:
         flash("Not allowed! You can only add one screener question.", "error")
-        return redirect(url_for("project.index", org_id=org_id))
+        return redirect(url_for("project.index"))
     q = (
         db.session.query(Question)
         .filter_by(user_id=current_user.id)
@@ -409,10 +396,10 @@ def new_multiple_choice_question(org_id, project_id):
 def question_details(project_id, name):
     """ display all the questions for a project which has been paid for """
     project = db.session.query(Project).filter_by(id=project_id).first()
-    questions = PaidProject.query.filter_by(project_id=project_id).all()
+    questions = Question.query.filter_by(project_id=project_id).all()
 
+    print(len(questions))
 
-    print(questions)
     return render_template(
         "question/question_details.html", question=questions, project=project
     )

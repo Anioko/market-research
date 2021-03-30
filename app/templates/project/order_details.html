@@ -9,7 +9,7 @@
 {% block content %}
     <div class="ui stackable centered grid container">
         <div class="twelve wide column">
-                <a class="ui basic compact button" href="{{ url_for('project.index', org_id=org.id) }}">
+                <a class="ui basic compact button" href="{{ url_for('project.index') }}">
                 <i class="caret left icon"></i>
                 Back to Questions' List
             </a>
@@ -43,9 +43,15 @@
 					  <div class="description">
 						<p></p>
 					  </div>
+					  {% if is_paid %}
 					  <div class="extra">
-						<h3 class="ui right floated header">Date: {{ today.strftime("%B %d, %Y") }} </h3>
+						<h3 class="ui right floated header">Date Paid:  </h3>
 					  </div>
+					  {% else %}
+						<div class="extra">
+							<h3 class="ui right floated header">Date: {{ today.strftime("%B %d, %Y") }} </h3>
+						</div>
+					  {% endif %}
 				  </div>
 				</div>
 			<table class="ui celled table">

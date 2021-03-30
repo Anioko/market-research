@@ -151,7 +151,7 @@ def thanks(line_item_id, project_id):
                 project_name=project.name,
                 question=question.title,
                 description=question.description,
-                question_type="Screener",
+                question_type=QuestionTypes.ScreenerQuestion.value,
             )
             db.session.add(screener)
 
@@ -170,7 +170,7 @@ def thanks(line_item_id, project_id):
                 order_id=order.id,
                 project_name=project.name,
                 question=question.title,
-                question_type="Scale",
+                question_type=QuestionTypes.ScaleQuestion.value,
                 description=question.description,
             )
             db.session.add(scale)
@@ -196,7 +196,7 @@ def thanks(line_item_id, project_id):
                 answer_option_three=question.multiple_choice_option_three,
                 answer_option_four=question.multiple_choice_option_four,
                 answer_option_five=question.multiple_choice_option_five,
-                question_type="MultipleChoice",
+                question_type=QuestionTypes.MultipleChoiceQuestion.value,
             )
             db.session.add(multi)
             db.session.commit()
