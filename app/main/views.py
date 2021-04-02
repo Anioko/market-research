@@ -75,10 +75,11 @@ def stripe_pay():
     project = Project.query.filter_by(
         user_id=current_user.id, id=line_item.project_id
     ).first()
+    print(line_item.line_item_id)
     # if order.created_at == Order.created_at
     quantity = line_item.quantity
     currency = line_item.currency
-    name = line_item.project.name
+    name = project.name
     unit_amount = line_item.unit_amount
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],

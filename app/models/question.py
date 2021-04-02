@@ -66,7 +66,7 @@ class Question(db.Model):
 
 class Answer(db.Model):
     __tablename__ = "answers"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     location_city = db.Column(db.String, index=True)
     location_state = db.Column(db.String, index=True)
     location_ip_address = db.Column(db.String, index=True)

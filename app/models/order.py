@@ -245,8 +245,6 @@ class ScaleAnswer(db.Model):
     )
 
     option = db.Column(db.String(64), index=True)
-
-    # project = db.relationship('Project', backref='scale')
     project_id = db.Column(db.Integer, db.ForeignKey("project.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
     __mapper_args__ = {"polymorphic_identity": "scale_answers"}

@@ -117,10 +117,19 @@ def new_project(org_id):
 def project_questions(project_id, name):
     """ display all the questions for a project which has been paid for """
     project = db.session.query(Project).filter_by(id=project_id).first()
-    questions = Question.query.filter_by(project_id=project_id).all()
+    screener_q = db.session.query(ScreenerQuestion).filter_by(project_id=project_id).first()
+    screener_a = db.session.query(ScreenerAnswer).filter_by(project_id=project_id).first()
+
+    screener_passed = False
+    if screener_a and (screener_q.required_answer == screener_a.answer_option_one):
+        screener_passed = True
+
+    questions = (
+        db.session.query(Question).filter_by(project_id=project_id).all()
+    )
 
     return render_template(
-        "question/question_details.html", questions=questions, project=project
+        "question/question_details.html", questions=questions, project=project, screener_passed=screener_passed
     )
 
 
