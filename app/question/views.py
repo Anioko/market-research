@@ -38,7 +38,7 @@ def index(page):
     org_ids = [org.id for org in orgs]
 
     paid_projects = db.session.query(PaidProject).filter(Organisation.id.in_(org_ids)).all()
-    project_ids = [project.id for project in paid_projects]
+    project_ids = [project.project_id for project in paid_projects]
 
     projects = db.session.query(Project).filter(Project.id.in_(project_ids)).paginate(page, per_page=10)
 
