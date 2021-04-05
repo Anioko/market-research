@@ -37,7 +37,7 @@ def index():
         .first()
     )
     if check_point_org is None:
-        flash(" You now need to add details of your organization.", "error")
+        flash(" You now need to add details of your organisation.", "error")
         return redirect(url_for("organisations.org_home"))
 
     check_point_project = (
@@ -55,7 +55,12 @@ def index():
         .first_or_404()
     )
 
-    project = db.session.query(Project).filter_by(user_id=current_user.id).all()
+    project = (
+        db.session.query(Project)
+        .filter_by(user_id=current_user.id)
+        .filter_by(organisation_id=check_point_org.id)
+        .all()
+    )
     # question = db.session.query(Question).filter_by(user_id=current_user.id).filter(Question.project_id==Project.id).all()
     count_screener_questions = (
         db.session.query(func.count(ScreenerQuestion.id))
@@ -108,6 +113,26 @@ def new_project(org_id):
     return render_template("project/create_project.html", form=form, org=org)
 
 
+@project.route("/<int:project_id>/")
+def project_questions(project_id):
+    """ display all the questions for a project which has been paid for """
+    project = db.session.query(Project).filter_by(id=project_id).first()
+    screener_q = db.session.query(ScreenerQuestion).filter_by(project_id=project_id).first()
+    screener_a = db.session.query(ScreenerAnswer).filter_by(project_id=project_id).first()
+
+    screener_passed = False
+    if screener_a and (screener_q.required_answer == screener_a.answer_option_one):
+        screener_passed = True
+
+    questions = (
+        db.session.query(Question).filter_by(project_id=project_id).all()
+    )
+
+    return render_template(
+        "question/question_details.html", questions=questions, project=project, screener_passed=screener_passed
+    )
+
+
 @project.route("/<org_id>/<int:project_id>/details/<name>/", methods=["GET", "POST"])
 def project_details(org_id, project_id, name):
     screener_questions_poly = with_polymorphic(Question, [ScreenerQuestion])
@@ -117,7 +142,8 @@ def project_details(org_id, project_id, name):
     check_point = (
         db.session.query(screener_questions_poly)
         .filter_by(user_id=current_user.id)
-        .filter(project_id == project_id)
+        .filter_by(project_id=project_id)
+        .filter_by(organisation_id=org_id)
         .count()
     )
     if check_point is None:
@@ -160,11 +186,10 @@ def project_details(org_id, project_id, name):
     project = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
-        .filter(Project.id == project_id)
+        .filter_by(id=project_id)
         .first()
     )
 
-    project_id = project_id
     # count_screener_questions = ScreenerQuestion.query.filter_by(user_id=current_user.id).filter(project_id==project_id).first()
     count_screener_questions = len(screener_question)
 
@@ -181,7 +206,7 @@ def project_details(org_id, project_id, name):
     project_item = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
-        .filter(Project.id == project_id)
+        .filter_by(id=project_id)
         .first()
     )
     ## calculate currency
@@ -212,13 +237,14 @@ def project_details(org_id, project_id, name):
         question_item = (
             db.session.query(Question)
             .filter_by(user_id=current_user.id)
-            .filter(project_id == project_id)
+            .filter_by(project_id=project_id)
             .first()
         )
         screener_question_item = (
             db.session.query(screener_questions_poly)
             .filter_by(user_id=current_user.id)
-            .filter(project_id == project_id)
+            .filter_by(project_id=project_id)
+            .filter_by(organisation_id=org_id)
             .first()
         )
 
@@ -231,7 +257,8 @@ def project_details(org_id, project_id, name):
         multiple_choice_question_item = (
             db.session.query(mc_questions_poly)
             .filter_by(user_id=current_user.id)
-            .filter(project_id == project_id)
+            .filter_by(project_id=project_id)
+            .filter_by(organisation_id=org_id)
             .first()
         )
         line_item_exists = LineItem.query.filter_by(project_id=project_item.id).first()
@@ -302,7 +329,6 @@ def order_details(org_id, project_id, name):
         .first()
     )
 
-    project_id = project_id
     count_screener_questions = (
         ScreenerQuestion.query.filter_by(user_id=current_user.id)
         .filter(project_id == project_id)
@@ -319,18 +345,18 @@ def order_details(org_id, project_id, name):
     project_item = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
-        .filter(Project.id == project_id)
+        .filter_by(organisation_id=org_id)
+        .filter_by(id=project_id)
         .first()
     )
     order = (
         db.session.query(LineItem)
         .filter_by(user_id=current_user.id)
-        .filter(Project.id == project_id)
+        .filter_by(project_id=project_id)
         .first()
     )
     paid_project = PaidProject.query.filter_by(project_id=project_item.id).first()
     project_is_paid = True if paid_project else False
-    print(project_is_paid)
     count_order = (
         Order.query.filter_by(user_id=current_user.id)
         .filter(project_id == project_id)
@@ -352,7 +378,7 @@ def order_details(org_id, project_id, name):
         count_screener_questions=count_screener_questions,
         count_questions=count_questions,
         order=order,
-        is_paid=paid_project,
+        is_paid=project_is_paid,
         today=today,
     )
 
@@ -392,15 +418,15 @@ def edit_project(org_id, project_id, name):
     )
 
 
-@project.route("/<project_id>/delete", methods=["GET", "POST"])
-def delete_project(project_id):
+@project.route("<project_id>/delete", methods=["GET", "POST"])
+def delete_project(org_id, project_id):
     project = (
         Project.query.filter_by(user_id=current_user.id)
         .filter_by(id=project_id)
         .first_or_404()
     )
     order = (
-        Order.query.filter_by(organisation_id=current_user.id)
+        Order.query.filter_by(organisation_id=org_id)
         .filter_by(id=project_id)
         .first_or_404()
     )
@@ -409,4 +435,4 @@ def delete_project(project_id):
     db.session.delete(project)
     db.session.commit()
     flash("Delete.", "success")
-    return redirect(url_for("project.index"))
+    return redirect(url_for("project.index", org_id=project.organisation_id))

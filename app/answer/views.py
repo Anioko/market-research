@@ -26,9 +26,18 @@ answer = Blueprint("answer", __name__)
 @answer.route("/<int:project_id>/<int:question_id>/add/", methods=["GET", "POST"])
 @login_required
 def add_screener_answer(project_id, question_id):
-    screener_question = db.session.query(ScreenerQuestion).filter_by(id=question_id).first()
+    screener_question = (
+        db.session.query(ScreenerQuestion).filter_by(id=question_id).first()
+    )
+    multiple_choice_question = (
+        db.session.query(MultipleChoiceQuestion).filter_by(project_id=project_id).all()
+    )
+    scale_question = (
+        db.session.query(ScaleQuestion).filter_by(project_id=project_id).all()
+    )
+
     form = AddScreenerAnswerForm()
-        
+
     if request.method == "POST":
         project = db.session.query(Project).filter_by(id=project_id).first()
         # questions = PaidProject.query.filter_by(project_id=project_id).all()
@@ -55,7 +64,9 @@ def add_screener_answer(project_id, question_id):
         if answer.answer_option_one == screener_question.required_answer:
             return redirect(
                 url_for(
-                    "question.question_details", project_id=project.id, name=project.name
+                    "project.project_questions",
+                    project_id=project.id,
+                    name=project.name,
                 )
             )
         else:
@@ -78,9 +89,8 @@ def add_screener_answer(project_id, question_id):
 )
 @login_required
 def add_scale_answer(project_id, question_id, question):
-
     project = db.session.query(Project).filter_by(id=project_id).first()
-    question = LineItem.query.filter_by(project_id=project_id).all()
+    #question = LineItem.query.filter_by(project_id=project_id).all()
 
     scale_question = ScaleQuestion.query.filter_by(id=question_id).first()
     answered = (
@@ -94,7 +104,7 @@ def add_scale_answer(project_id, question_id, question):
         flash("This question has already been answered by you.", "success")
         return redirect(
             url_for(
-                "question.question_details", project_id=project.id, name=project.name
+                "project.project_questions", project_id=project.id, name=project.name
             )
         )
 
@@ -102,27 +112,31 @@ def add_scale_answer(project_id, question_id, question):
         id=question_id, options="5 Point Likert Scale"
     ).first()
 
-    if select_answer_form == "5 Point Likert Scale":
+
+    if select_answer_form and (select_answer_form.options == "5 Point Likert Scale"):
         form = AddScaleAnswerForm()
     else:
-        AddSemanticAnswerForm()
-
-    if form.validate_on_submit():
-        appt = ScaleAnswer(
-            scale_question_id=scale_question.id,
-            user_id=current_user.id,
-            option=form.option.data,
-        )
-        db.session.add(appt)
-        db.session.commit()
-        flash("Answer submitted.", "success")
-        return redirect(
-            url_for(
-                "question.question_details", project_id=project.id, name=project.name
+        form = AddSemanticAnswerForm()
+    
+    if request.method == "POST":
+        if form.validate_on_submit():
+            appt = ScaleAnswer(
+                scale_question_id=scale_question.id,
+                user_id=current_user.id,
+                project_id=project_id,
+                option=form.option.data,
             )
-        )
+            db.session.add(appt)
+            db.session.commit()
+
+            flash("Answer submitted.", "success")
+            return redirect(
+                url_for(
+                    "project.project_questions", project_id=project.id, name=project.name
+                )
+            )
     return render_template(
-        "answer/add_scale_answer.html", scale_question=scale_question, form=form
+        "answer/add_scale_answer.html", scale_question=scale_question, form=form, project_id=project_id
     )
 
 

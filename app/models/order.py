@@ -237,7 +237,7 @@ class ScaleQuestion(Question):
     __mapper_args__ = {"polymorphic_identity": "scale_questions"}
 
 
-class ScaleAnswer(db.Model):
+class ScaleAnswer(Answer):
     __tablename__ = "scale_answers"
     id = db.Column(db.ForeignKey("answers.id"), primary_key=True)
     scale_question_id = db.Column(
@@ -245,8 +245,6 @@ class ScaleAnswer(db.Model):
     )
 
     option = db.Column(db.String(64), index=True)
-
-    # project = db.relationship('Project', backref='scale')
     project_id = db.Column(db.Integer, db.ForeignKey("project.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
     __mapper_args__ = {"polymorphic_identity": "scale_answers"}

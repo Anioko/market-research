@@ -2,14 +2,18 @@
 {% block content %}
     <div class="ui stackable grid container">
         <div class="sixteen wide tablet twelve wide computer centered column">
+        {% if current_user.respondent == false %}
             <a class="ui basic compact button" href="{{ url_for('project.index') }}">
                 <i class="caret left icon"></i>
                 Back to Project dashboard
             </a>
+        {% else %}
+            
+        {% endif %}
             <h2 class="ui header">
                 Available Questions
                 <div class="sub header">
-                    View available projects
+                    View available questions
                 </div>
             </h2>
             {# Use overflow-x: scroll so that mobile views don't freak out
@@ -25,12 +29,12 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for u in question.items %}
+                    {% for project in projects.items %}
                         <tr>
-                            <td>{{ u.line_item_id }}</td>
-                            <td>{{ u.project.name }}</td>
+                            <td>{{ project.id }}</td>
+                            <td>{{ project.name }}</td>
                             <td>
-                                <a class="ui blue left floated button" href="{{ url_for('question.question_details', project_id=u.project_id, name=u.project.name) }}">View Questions</a>
+                                <a class="ui blue left floated button" href="{{ url_for('project.project_questions', project_id=project.id, name=project.name) }}">View Questions</a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -43,11 +47,11 @@
         </form>
     </div>
     <div class="ui centered grid ">
-        {% if question.pages > 0 %}
+        {% if projects.pages > 0 %}
             <div class="ui pagination menu">
-                {% for page in question.iter_pages() %}
+                {% for page in projects.iter_pages() %}
                     {% if page %}
-                        {% if page != question.page %}
+                        {% if page != projects.page %}
                             <a class="item"
                                href="{{ url_for(request.endpoint,  page=page) }}">
                                 {{ page }}

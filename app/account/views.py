@@ -43,9 +43,14 @@ def login():
         ):
             login_user(user, form.remember_me.data)
             flash("You are now logged in. Welcome back!", "success")
-            return redirect(
-                request.args.get("next") or url_for("organisations.org_home")
-            )
+            if user.is_respondent:
+                return redirect(
+                    request.args.get("next") or url_for("question.index")
+                )
+            else:
+                return redirect(
+                    request.args.get("next") or url_for("organisations.org_home")
+                )
         else:
             flash("Invalid email or password.", "error")
     return render_template("account/login.html", form=form)

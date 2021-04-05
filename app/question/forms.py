@@ -290,4 +290,10 @@ class AddScaleQuestionForm(FlaskForm):
             ("Semantic Differential Scale", "Semantic Differential Scale"),
         ],
     )
+    option_one = StringField("Option One")
+
+    option_two = StringField("Option Two")
+    option_three = StringField("Option Three")
+    option_four = StringField("Option Four")
+    option_five = StringField("Option Five")
     submit = SubmitField("Submit")

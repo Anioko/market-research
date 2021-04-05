@@ -29,32 +29,22 @@ question = Blueprint("question", __name__)
 @login_required
 def index(page):
     """Question dashboard page."""
-    # return redirect(url_for('project.index'))
-
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=Organisation.id)
-        .first_or_404()
-    )
     orgs = (
         current_user.organisations
         + Organisation.query.join(OrgStaff, Organisation.id == OrgStaff.org_id)
         .filter(OrgStaff.user_id == current_user.id)
         .all()
     )
-    # question = db.session.query(Question).filter_by(user_id=current_user.id).all()
-    question = LineItem.query.paginate(page, per_page=10)
-    count = (
-        db.session.query(func.count(Question.id))
-        .filter_by(user_id=current_user.id)
-        .scalar()
-    )
+    org_ids = [org.id for org in orgs]
+
+    paid_projects = db.session.query(PaidProject).filter(Organisation.id.in_(org_ids)).all()
+    project_ids = [project.project_id for project in paid_projects]
+
+    projects = db.session.query(Project).filter(Project.id.in_(project_ids)).paginate(page, per_page=10)
+
     return render_template(
         "question/question_dashboard.html",
-        orgs=orgs,
-        question=question,
-        org=org,
-        count=count,
+        projects=projects,
     )
 
 
@@ -143,7 +133,8 @@ def new_screener_question(org_id, project_id):
     question = (
         db.session.query(screener_questions_poly)
         .filter_by(user_id=current_user.id)
-        .filter(project_id == project_id)
+        .filter_by(project_id=project_id)
+        .filter_by(organisation_id=org_id)
         .first()
     )
     if question is not None:
@@ -159,7 +150,7 @@ def new_screener_question(org_id, project_id):
     if form.validate_on_submit():
         appt = ScreenerQuestion(
             project_id=project.id,
-            title=form.question.data,
+            title=form.title.data,
             description=form.description.data,
             required_answer=form.required_answer.data,
             answer_option_one=form.answer_option_one.data,
@@ -184,7 +175,13 @@ def new_screener_question(org_id, project_id):
         # question_id=appt.id, name=appt.name))
     else:
         flash("ERROR! Data was not added.", "error")
-    return render_template("question/create_screener_question.html", form=form)
+    return render_template(
+        "question/create_screener_question.html",
+        form=form,
+        project_id=project_id,
+        project_name=project.name,
+        org_id=org_id,
+    )
 
 
 @question.route("/<org_id>/<project_id>/scl/create/", methods=["Get", "POST"])
@@ -195,6 +192,8 @@ def new_scale_question(org_id, project_id):
         .filter_by(id=org_id)
         .first()
     )
+    project = Project.query.filter(Project.id == project_id).first()
+
     question = (
         db.session.query(Question)
         .filter_by(user_id=current_user.id)
@@ -225,7 +224,6 @@ def new_scale_question(org_id, project_id):
             user_id=current_user.id,
         )
         db.session.add(appt)
-        project = Project.query.filter(Project.id == project_id).first()
         db.session.commit()
         flash("Successfully created".format(appt.title), "form-success")
         return redirect(
@@ -240,7 +238,13 @@ def new_scale_question(org_id, project_id):
         # question_id=appt.id, name=appt.name))
     else:
         flash("ERROR! Data was not added.", "error")
-    return render_template("question/create_scale_question.html", form=form)
+    return render_template(
+        "question/create_scale_question.html",
+        form=form,
+        project_id=project_id,
+        project_name=project.name,
+        org_id=org_id,
+    )
 
 
 @question.route("/<project_id>/<question_id>/scl/create/", methods=["Get", "POST"])
@@ -330,6 +334,8 @@ def new_multiple_choice_question(org_id, project_id):
         .filter_by(id=org_id)
         .first()
     )
+    project = Project.query.filter(Project.id == project_id).first()
+
     if question is None:
         flash("Not allowed! You can have to start with a sceener question.", "error")
         return redirect(
@@ -362,22 +368,6 @@ def new_multiple_choice_question(org_id, project_id):
             user_id=current_user.id,
         )
         db.session.add(appt)
-        """appts = Question(
-            project_id = project_id,
-            title=form.title.data,
-            description=form.description.data,
-            question_type="Multiple choice questions",
-
-            multiple_choice_option_one = form.multiple_choice_option_one.data,
-            multiple_choice_option_two = form.multiple_choice_option_two.data,
-            multiple_choice_option_three = form.multiple_choice_option_three.data,
-            multiple_choice_option_four = form.multiple_choice_option_four.data,
-            multiple_choice_option_five = form.multiple_choice_option_five.data,
-            
-            user_id=current_user.id
-            )
-        db.session.add(appts)"""
-        project = Project.query.filter(Project.id == project_id).first()
         db.session.commit()
         flash("Successfully created".format(appt.title), "form-success")
         return redirect(
@@ -393,17 +383,25 @@ def new_multiple_choice_question(org_id, project_id):
         # question_id=appt.id, name=appt.name))
     else:
         flash("ERROR! Data was not added.", "error")
-    return render_template("question/create_multiple_choice_question.html", form=form)
+    return render_template(
+        "question/create_multiple_choice_question.html",
+        form=form,
+        project_id=project_id,
+        project_name=project.name,
+        org_id=org_id,
+    )
 
 
 @question.route("/<int:project_id>/<name>/")
 def question_details(project_id, name):
     """ display all the questions for a project which has been paid for """
     project = db.session.query(Project).filter_by(id=project_id).first()
-    questions = PaidProject.query.filter_by(project_id=project_id).all()
+    questions = Question.query.filter_by(project_id=project_id).all()
+
+    print(len(questions))
 
     return render_template(
-        "question/question_details.html", question=question, project=project
+        "question/question_details.html", questions=questions, project=project
     )
 
 
@@ -537,7 +535,12 @@ def edit_scale_question(org_id, project_id, question_id, question):
             )
         )
     return render_template(
-        "question/create_scale_question.html", question=question, form=form
+        "question/create_scale_question.html",
+        question=question,
+        project_id=project_id,
+        org_id=org_id,
+        form=form,
+        project_name=project.name,
     )
 
 
@@ -584,7 +587,10 @@ def edit_multiple_choice_question(org_id, project_id, question_id, question):
             )
         )
     return render_template(
-        "question/create_multiple_choice_question.html", question=question, form=form
+        "question/create_multiple_choice_question.html",
+        question=question,
+        project_id=project_id,
+        form=form,
     )
 
 

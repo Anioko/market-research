@@ -75,10 +75,11 @@ def stripe_pay():
     project = Project.query.filter_by(
         user_id=current_user.id, id=line_item.project_id
     ).first()
+    print(line_item.line_item_id)
     # if order.created_at == Order.created_at
     quantity = line_item.quantity
     currency = line_item.currency
-    name = line_item.project.name
+    name = project.name
     unit_amount = line_item.unit_amount
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
@@ -151,7 +152,7 @@ def thanks(line_item_id, project_id):
                 project_name=project.name,
                 question=question.title,
                 description=question.description,
-                question_type="Screener",
+                question_type=QuestionTypes.ScreenerQuestion.value,
             )
             db.session.add(screener)
 
@@ -170,7 +171,7 @@ def thanks(line_item_id, project_id):
                 order_id=order.id,
                 project_name=project.name,
                 question=question.title,
-                question_type="Scale",
+                question_type=QuestionTypes.ScaleQuestion.value,
                 description=question.description,
             )
             db.session.add(scale)
@@ -196,7 +197,7 @@ def thanks(line_item_id, project_id):
                 answer_option_three=question.multiple_choice_option_three,
                 answer_option_four=question.multiple_choice_option_four,
                 answer_option_five=question.multiple_choice_option_five,
-                question_type="MultipleChoice",
+                question_type=QuestionTypes.MultipleChoiceQuestion.value,
             )
             db.session.add(multi)
             db.session.commit()
