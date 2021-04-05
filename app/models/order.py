@@ -237,7 +237,7 @@ class ScaleQuestion(Question):
     __mapper_args__ = {"polymorphic_identity": "scale_questions"}
 
 
-class ScaleAnswer(db.Model):
+class ScaleAnswer(Answer):
     __tablename__ = "scale_answers"
     id = db.Column(db.ForeignKey("answers.id"), primary_key=True)
     scale_question_id = db.Column(

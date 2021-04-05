@@ -113,8 +113,8 @@ def new_project(org_id):
     return render_template("project/create_project.html", form=form, org=org)
 
 
-@project.route("/<int:project_id>/<name>/")
-def project_questions(project_id, name):
+@project.route("/<int:project_id>/")
+def project_questions(project_id):
     """ display all the questions for a project which has been paid for """
     project = db.session.query(Project).filter_by(id=project_id).first()
     screener_q = db.session.query(ScreenerQuestion).filter_by(project_id=project_id).first()

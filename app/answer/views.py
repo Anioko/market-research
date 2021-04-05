@@ -104,7 +104,7 @@ def add_scale_answer(project_id, question_id, question):
         flash("This question has already been answered by you.", "success")
         return redirect(
             url_for(
-                "question.question_details", project_id=project.id, name=project.name
+                "project.project_questions", project_id=project.id, name=project.name
             )
         )
 
@@ -132,11 +132,11 @@ def add_scale_answer(project_id, question_id, question):
             flash("Answer submitted.", "success")
             return redirect(
                 url_for(
-                    "question.question_details", project_id=project.id, name=project.name
+                    "project.project_questions", project_id=project.id, name=project.name
                 )
             )
     return render_template(
-        "answer/add_scale_answer.html", scale_question=scale_question, form=form
+        "answer/add_scale_answer.html", scale_question=scale_question, form=form, project_id=project_id
     )
 
 
