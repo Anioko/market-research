@@ -80,6 +80,40 @@ def index():
     )
 
 
+@project.route("/org/<org_id>")
+@login_required
+def org_projects(org_id):
+    """project dashboard page."""
+    org = (
+        Organisation.query.filter_by(user_id=current_user.id)
+        .filter_by(id=org_id)
+        .first()
+    )
+
+    project = (
+        db.session.query(Project)
+        .filter_by(user_id=current_user.id)
+        .filter_by(organisation_id=org_id)
+        .all()
+    )
+    # question = db.session.query(Question).filter_by(user_id=current_user.id).filter(Question.project_id==Project.id).all()
+    count_screener_questions = (
+        db.session.query(func.count(ScreenerQuestion.id))
+        .filter(ScreenerQuestion.project_id == Project.id)
+        .scalar()
+    )
+    questions_poly = with_polymorphic(
+        Question, [ScreenerQuestion, ScaleQuestion, MultipleChoiceQuestion]
+    )
+
+    # count_questions = Question.query.filter_by(user_id=current_user.id).filter(Question.project_id == Project.id).count()
+    return render_template(
+        "project/project_dashboard.html",
+        project=project,
+        org=org,
+        count_screener_questions=count_screener_questions,
+    )
+
 @project.route("/<org_id>/create/", methods=["Get", "POST"])
 @login_required
 def new_project(org_id):

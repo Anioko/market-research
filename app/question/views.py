@@ -134,7 +134,6 @@ def new_screener_question(org_id, project_id):
         db.session.query(screener_questions_poly)
         .filter_by(user_id=current_user.id)
         .filter_by(project_id=project_id)
-        .filter_by(organisation_id=org_id)
         .first()
     )
     if question is not None:
@@ -397,8 +396,6 @@ def question_details(project_id, name):
     """ display all the questions for a project which has been paid for """
     project = db.session.query(Project).filter_by(id=project_id).first()
     questions = Question.query.filter_by(project_id=project_id).all()
-
-    print(len(questions))
 
     return render_template(
         "question/question_details.html", questions=questions, project=project

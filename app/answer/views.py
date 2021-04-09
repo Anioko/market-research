@@ -90,24 +90,9 @@ def add_screener_answer(project_id, question_id):
 @login_required
 def add_scale_answer(project_id, question_id, question):
     project = db.session.query(Project).filter_by(id=project_id).first()
-    #question = LineItem.query.filter_by(project_id=project_id).all()
 
     scale_question = ScaleQuestion.query.filter_by(id=question_id).first()
-    answered = (
-        db.session.query(ScaleAnswer)
-        .filter_by(user_id=current_user.id)
-        .filter(ScaleAnswer.scale_question_id == question_id)
-        .count()
-    )
-
-    if answered >= 1:
-        flash("This question has already been answered by you.", "success")
-        return redirect(
-            url_for(
-                "project.project_questions", project_id=project.id, name=project.name
-            )
-        )
-
+    
     select_answer_form = ScaleQuestion.query.filter_by(
         id=question_id, options="5 Point Likert Scale"
     ).first()

@@ -67,7 +67,7 @@
                                 <a class="ui primary button" href="{{ url_for('organisations.select_org', org_id=og.id) }}">Org Details</a>
                             </td>
                             <td>
-                                <a class="ui primary button" href="{{ url_for('project.index') }}">Projects</a>
+                                <a class="ui primary button" href="{{ url_for('project.org_projects', org_id=og.id) }}">Projects</a>
                             </td>
 							<td>
                                 <a class="ui teal button" href="{{ url_for('project.new_project', org_id=og.id) }}">Create Project</a>
