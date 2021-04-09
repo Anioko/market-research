@@ -33,32 +33,30 @@ def index():
     """project dashboard page."""
     check_point_org = (
         Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=Organisation.id)
         .first()
     )
+    orgs = (
+        Organisation.query.filter_by(user_id=current_user.id)
+        .all()
+    )
+    org_ids = [_org.id for _org in orgs]
     if check_point_org is None:
         flash(" You now need to add details of your organisation.", "error")
         return redirect(url_for("organisations.org_home"))
 
     check_point_project = (
         Project.query.filter_by(user_id=current_user.id)
-        .filter_by(id=Project.id)
+        .filter(Organisation.id.in_(org_ids))
         .first()
     )
     if check_point_project is None:
         flash(" You now need create a project.", "error")
-        return redirect(url_for("project.new_project", org_id=check_point_org.id))
-
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=Organisation.id)
-        .first_or_404()
-    )
+        return redirect(url_for("organisations.org_home"))
 
     project = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
-        .filter_by(organisation_id=check_point_org.id)
+        .filter(Organisation.id.in_(org_ids))
         .all()
     )
     # question = db.session.query(Question).filter_by(user_id=current_user.id).filter(Question.project_id==Project.id).all()
@@ -75,7 +73,6 @@ def index():
     return render_template(
         "project/project_dashboard.html",
         project=project,
-        org=org,
         count_screener_questions=count_screener_questions,
     )
 
@@ -437,7 +434,6 @@ def edit_project(org_id, project_id, name):
         .first()
     )
     order = Order.query.filter(Order.project_id == project_id).first()
-    project_id = project_id
 
     form = AddProjectForm(obj=project)
     if form.validate_on_submit():

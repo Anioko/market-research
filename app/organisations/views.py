@@ -25,7 +25,6 @@ def org_home():
     )
     org = (
         Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=Organisation.id)
         .all()
     )
 
