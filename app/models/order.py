@@ -159,6 +159,40 @@ class LineItem(db.Model):
     )
 
 
+
+class UQuestion(Question):
+    __tablename__ = "u_questions"
+    id = db.Column(db.ForeignKey("questions.id"), primary_key=True)
+    option_one = db.Column(db.String(64))
+    option_two = db.Column(db.String(64))
+    option_three = db.Column(db.String(64))
+    option_four = db.Column(db.String(64))
+    option_five = db.Column(db.String(64))
+
+    u_answers = db.relationship("UAnswer", backref="uquestion", lazy="dynamic")
+
+    __mapper_args__ = {"polymorphic_identity": "u_question"}
+
+    def __repr__(self):
+        return "UQuestion id:{}".format(self.id)
+
+class UAnswer(Answer):
+    __tablename__ = "u_answers"
+    id = db.Column(db.ForeignKey("answers.id"), primary_key=True)
+    
+    option_one_answer = db.Column(db.String(64), index=True)
+    option_two_answer = db.Column(db.String(64), index=True)
+    option_three_answer = db.Column(db.String(64), index=True)
+    option_four_answer = db.Column(db.String(64), index=True)
+    option_five_answer = db.Column(db.String(64), index=True)
+
+    project_id = db.Column(db.Integer, db.ForeignKey("project.id", ondelete="CASCADE"))
+    u_questions_id = db.Column(
+        db.Integer, db.ForeignKey("u_questions.id", ondelete="CASCADE")
+    )
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
+    __mapper_args__ = {"polymorphic_identity": "u_answers"}
+
 class ScreenerQuestion(Question):
     __tablename__ = "screener_questions"
     id = db.Column(db.ForeignKey("questions.id"), primary_key=True)

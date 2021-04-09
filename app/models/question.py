@@ -23,7 +23,7 @@ class Question(db.Model):
         "polymorphic_on": question_type,
     }
 
-    """    multiple_choice_option_one = db.Column(db.String(64))
+    """ multiple_choice_option_one = db.Column(db.String(64))
         multiple_choice_option_two = db.Column(db.String(64))
         multiple_choice_option_three = db.Column(db.String(64))
         multiple_choice_option_four = db.Column(db.String(64))
@@ -40,8 +40,6 @@ class Question(db.Model):
         option_three_scale = db.Column(db.Integer)
         option_four_scale = db.Column(db.Integer)
         option_five_scale = db.Column(db.Integer)   
-        
-
         
         screener_question = db.relationship("ScreenerQuestion", backref=db.backref('questions'))
         scale_question = db.relationship("ScaleQuestion", backref=db.backref('questions'))
