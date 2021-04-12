@@ -32,24 +32,15 @@ class AddUQuestionForm(FlaskForm):
     )
 
     option_one = StringField("Option one")
-    option_two = StringField("Option Two")
-    option_three = StringField("Option Three")
-    option_four = StringField("Option Four")
-    option_five = StringField("Option Five")
     submit = SubmitField("Submit")
 
 
 class EditUQuestionForm(FlaskForm):
-    question = StringField('Question Title e.g "What is the your favourite color"')
+    title = StringField('Question Title e.g "What is the your favourite color"')
     description = StringField(
         'Descriptions of the question e.g " This question is required so we can determine what colors you like" '
     )
     option_one = StringField("Option One")
-
-    option_two = StringField("Option Two")
-    option_three = StringField("Option Three")
-    option_four = StringField("Option Four")
-    option_five = StringField("Option Five")
     submit = SubmitField("Submit")
 
 

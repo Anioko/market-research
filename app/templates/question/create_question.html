@@ -35,18 +35,6 @@
     <div class="field">
       {{ f.render_form_field(form.option_one) }}
     </div>
-    <div class="field">
-      {{ f.render_form_field(form.option_two) }}
-    </div>
-    <div class="field">
-      {{ f.render_form_field(form.option_three) }}
-    </div>
-    <div class="field">
-      {{ f.render_form_field(form.option_four) }}
-    </div>
-    <div class="field">
-      {{ f.render_form_field(form.option_five) }}
-    </div>
     {% for field in form | selectattr('type', 'equalto', 'SubmitField') %}
       {{ f.render_form_field(field) }}
     {% endfor %}

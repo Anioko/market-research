@@ -129,14 +129,18 @@ def stripe_pay(project_id):
 
 @main.route("/thanks/<line_item_id>/<project_id>")
 def thanks(line_item_id, project_id):
-    order = Order.query.filter_by(user_id=current_user.id).filter_by(project_id=project_id).first()
+    order = (
+        Order.query.filter_by(user_id=current_user.id)
+        .filter_by(project_id=project_id)
+        .first()
+    )
     project = Project.query.filter_by(id=project_id).first()
 
     project_paid = PaidProject(
-                project_id=project_id,
-                order_id=order.id,
-                project_name=project.name,
-            )
+        project_id=project_id,
+        order_id=order.id,
+        project_name=project.name,
+    )
     db.session.add(project_paid)
 
     return render_template("main/thanks.html")

@@ -52,6 +52,15 @@ class AddMultipleChoiceAnswerForm(FlaskForm):
     submit = SubmitField("Submit")
 
 
+class AddUAnswerForm(FlaskForm):
+    option_one = StringField("Answer Option one")
+    option_two = StringField("Answer Option Two")
+    option_three = StringField("Answer Option Three")
+    option_four = StringField("Answer Option Four")
+    option_five = StringField("Answer Option Five")
+    submit = SubmitField("Submit")
+
+
 class AddScaleAnswerForm(FlaskForm):
     option = SelectField(
         u"Please choose one of the following ",

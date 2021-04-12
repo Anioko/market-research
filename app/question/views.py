@@ -37,10 +37,16 @@ def index(page):
     )
     org_ids = [org.id for org in orgs]
 
-    paid_projects = db.session.query(PaidProject).filter(Organisation.id.in_(org_ids)).all()
+    paid_projects = (
+        db.session.query(PaidProject).filter(Organisation.id.in_(org_ids)).all()
+    )
     project_ids = [project.project_id for project in paid_projects]
 
-    projects = db.session.query(Project).filter(Project.id.in_(project_ids)).paginate(page, per_page=10)
+    projects = (
+        db.session.query(Project)
+        .filter(Project.id.in_(project_ids))
+        .paginate(page, per_page=10)
+    )
 
     return render_template(
         "question/question_dashboard.html",
@@ -84,10 +90,6 @@ def new_question(org_id, project_id):
                 description=form.description.data,
                 organisation_id=org_id,
                 option_one=form.option_one.data,
-                option_two=form.option_two.data,
-                option_three=form.option_three.data,
-                option_four=form.option_four.data,
-                option_five=form.option_five.data,
                 question_type=QuestionTypes.UQuestion.value,
                 user_id=current_user.id,
             )
@@ -521,10 +523,6 @@ def edit_u_question(org_id, project_id, question_id, question):
         question.title = form.title.data
         question.description = form.description.data
         question.option_one = form.option_one.data
-        question.option_two = form.option_two.data
-        question.option_three = form.option_three.data
-        question.option_four = form.option_four.data
-        question.option_five = form.option_five.data
         question.user_id = current_user.id
         db.session.add(question)
         db.session.commit()
@@ -539,14 +537,13 @@ def edit_u_question(org_id, project_id, question_id, question):
             )
         )
     return render_template(
-        "question/create_scale_question.html",
+        "question/create_question.html",
         question=question,
         project_id=project_id,
         org_id=org_id,
         form=form,
         project_name=project.name,
     )
-
 
 
 @question.route("/<question_id>/delete", methods=["GET", "POST"])

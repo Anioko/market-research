@@ -83,6 +83,7 @@ class PaidProject(db.Model):
     respondent_id = db.Column(db.Integer)
     project_name = db.Column(db.String(64), index=True)
 
+
 class Project(db.Model):
     __tablename__ = "project"
     id = db.Column(db.Integer, primary_key=True)
@@ -138,7 +139,6 @@ class LineItem(db.Model):
     )
 
 
-
 class UQuestion(Question):
     __tablename__ = "u_questions"
     id = db.Column(db.ForeignKey("questions.id"), primary_key=True)
@@ -155,10 +155,11 @@ class UQuestion(Question):
     def __repr__(self):
         return "UQuestion id:{}".format(self.id)
 
+
 class UAnswer(Answer):
     __tablename__ = "u_answers"
     id = db.Column(db.ForeignKey("answers.id"), primary_key=True)
-    
+
     option_one_answer = db.Column(db.String(64), index=True)
     option_two_answer = db.Column(db.String(64), index=True)
     option_three_answer = db.Column(db.String(64), index=True)
@@ -171,6 +172,7 @@ class UAnswer(Answer):
     )
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
     __mapper_args__ = {"polymorphic_identity": "u_answers"}
+
 
 class ScreenerQuestion(Question):
     __tablename__ = "screener_questions"

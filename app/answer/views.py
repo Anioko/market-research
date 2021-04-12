@@ -23,27 +23,55 @@ from sqlalchemy import func
 answer = Blueprint("answer", __name__)
 
 
+@answer.route(
+    "/<int:project_id>/<int:question_id>/<question>/ca/add/", methods=["Get", "POST"]
+)
+@login_required
+def add_custom_answer(project_id, question_id, question):
+    project = db.session.query(Project).filter_by(id=project_id).first()
+
+    custom_question = UQuestion.query.filter_by(id=question_id).first()
+
+    form = AddUAnswerForm()
+
+    if request.method == "POST":
+        if form.validate_on_submit():
+            appt = UAnswer(
+                u_question_id=scale_question.id,
+                user_id=current_user.id,
+                project_id=project_id,
+                option=form.option.data,
+                option_one_answer=form.option_one_answer.data,
+            )
+            db.session.add(appt)
+            db.session.commit()
+
+            flash("Answer submitted.", "success")
+            return redirect(
+                url_for(
+                    "project.project_questions",
+                    project_id=project.id,
+                    name=project.name,
+                )
+            )
+    return render_template(
+        "answer/add_custom_answer.html",
+        u_question=custom_question,
+        form=form,
+        project_id=project_id,
+    )
+
+
 @answer.route("/<int:project_id>/<int:question_id>/add/", methods=["GET", "POST"])
 @login_required
 def add_screener_answer(project_id, question_id):
     screener_question = (
         db.session.query(ScreenerQuestion).filter_by(id=question_id).first()
     )
-    multiple_choice_question = (
-        db.session.query(MultipleChoiceQuestion).filter_by(project_id=project_id).all()
-    )
-    scale_question = (
-        db.session.query(ScaleQuestion).filter_by(project_id=project_id).all()
-    )
-
     form = AddScreenerAnswerForm()
 
     if request.method == "POST":
         project = db.session.query(Project).filter_by(id=project_id).first()
-        # questions = PaidProject.query.filter_by(project_id=project_id).all()
-
-        # for question in questions:
-        #    question = question
 
         if form.validate_on_submit():
             appt = ScreenerAnswer(
@@ -92,17 +120,16 @@ def add_scale_answer(project_id, question_id, question):
     project = db.session.query(Project).filter_by(id=project_id).first()
 
     scale_question = ScaleQuestion.query.filter_by(id=question_id).first()
-    
+
     select_answer_form = ScaleQuestion.query.filter_by(
         id=question_id, options="5 Point Likert Scale"
     ).first()
-
 
     if select_answer_form and (select_answer_form.options == "5 Point Likert Scale"):
         form = AddScaleAnswerForm()
     else:
         form = AddSemanticAnswerForm()
-    
+
     if request.method == "POST":
         if form.validate_on_submit():
             appt = ScaleAnswer(
@@ -117,11 +144,16 @@ def add_scale_answer(project_id, question_id, question):
             flash("Answer submitted.", "success")
             return redirect(
                 url_for(
-                    "project.project_questions", project_id=project.id, name=project.name
+                    "project.project_questions",
+                    project_id=project.id,
+                    name=project.name,
                 )
             )
     return render_template(
-        "answer/add_scale_answer.html", scale_question=scale_question, form=form, project_id=project_id
+        "answer/add_scale_answer.html",
+        scale_question=scale_question,
+        form=form,
+        project_id=project_id,
     )
 
 

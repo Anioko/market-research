@@ -49,6 +49,20 @@
 										<p> Answer: {# scale_answer.option #}</p>
 									{# endif #}
 							</div>
+						{% elif question.question_type == "u_questions" %}
+							<div class="ui segment">
+								<div class="ui right floated horizontal list">
+								<a class="item" href="{{ url_for('answer.add_custom_answer', project_id=project.id, question_id=question.id, question=question.title) }}"><i class="eye icon"></i></a> 
+								</div>
+								<h3 class="ui left floated header">{{ question.title }}</h3>
+								<div class="ui clearing divider"></div>
+								<h5 class="ui header"></h5>
+								<p>{{ question.description }}</p>
+									{# if question.scale_answer #}
+										<div class="ui divider"></div>
+										<p> Answer: {# scale_answer.option #}</p>
+									{# endif #}
+							</div>
 					{% endif %}
 
 				{% else %}

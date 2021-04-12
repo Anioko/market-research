@@ -23,10 +23,7 @@ def org_home():
         .filter(OrgStaff.user_id == current_user.id)
         .all()
     )
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .all()
-    )
+    org = Organisation.query.filter_by(user_id=current_user.id).all()
 
     """If user has not created an organisation."""
     check_point = (

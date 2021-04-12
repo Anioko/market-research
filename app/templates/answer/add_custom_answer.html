@@ -1,0 +1,65 @@
+{% extends 'layouts/base.html' %}
+{% import 'macros/form_macros.html' as f %}
+
+
+
+{% block scripts %}
+{% endblock %}
+
+{% block content %}
+    <div class="ui stackable centered grid container">
+        <div class="twelve wide column">
+                <a class="ui basic compact button" href="{{ url_for('project.project_questions', project_id=project_id) }}">
+                <i class="caret left icon"></i>
+                Back to Questions' List
+            </a>
+            <h2 class="ui header">
+                Add an answer
+       
+            </h2>
+			<div class="ui segment">
+				<div class="sub header">How to fill this section</div>
+				<div class="ui ordered list">
+				  <div class="item">Indicate your answer in the field provided. </div>
+				  <div class="item"> Please type into the box only when your answer fits the description of the box. E.g if your answer is "Undecided", type in "Undecided" into the box, without including "".</div>
+				  <div class="item">Type only one answer. Leave the rest of the answer boxes empty if you have written only one answer.</div>
+				</div>
+			</div>
+
+            {% set flashes = {
+                'error':   get_flashed_messages(category_filter=['form-error']),
+                'warning': get_flashed_messages(category_filter=['form-check-email']),
+                'info':    get_flashed_messages(category_filter=['form-info']),
+                'success': get_flashed_messages(category_filter=['form-success'])
+            } %}
+
+            {{ f.begin_form(form, flashes) }}
+			{% if u_question %}
+
+			<div class="ui segment">
+				<div class="ui right floated horizontal list"> 
+				</div>
+			  <h3 class="ui left floated header">{{u_question.title }}</h3>
+			  <div class="ui clearing divider"></div>
+			  <h5 class="ui header">{{u_question.description }}</h5>
+			  <p></p>
+			  <div class="ui clearing divider"></div>
+				<div class="field">
+					{{ form.option_one  }}
+				</div>				
+				{{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}
+				{{ f.form_message(flashes['warning'], header='Check your email.', class='warning') }}
+				{{ f.form_message(flashes['info'], header='Information', class='info') }}
+				{{ f.form_message(flashes['success'], header='Success!', class='success') }}
+
+				{% for field in form | selectattr('type', 'equalto', 'SubmitField') %}
+				<div class="field">
+					{{ form.submit(class="ui button") }}
+				{% endfor %}
+				</div>
+				{{ f.end_form() }}
+
+        </div>
+		{% endif %}
+    </div>
+{% endblock %}

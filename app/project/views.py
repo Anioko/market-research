@@ -31,14 +31,8 @@ project = Blueprint("project", __name__)
 @login_required
 def index():
     """project dashboard page."""
-    check_point_org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .first()
-    )
-    orgs = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .all()
-    )
+    check_point_org = Organisation.query.filter_by(user_id=current_user.id).first()
+    orgs = Organisation.query.filter_by(user_id=current_user.id).all()
     org_ids = [_org.id for _org in orgs]
     if check_point_org is None:
         flash(" You now need to add details of your organisation.", "error")
@@ -111,6 +105,7 @@ def org_projects(org_id):
         count_screener_questions=count_screener_questions,
     )
 
+
 @project.route("/<org_id>/create/", methods=["Get", "POST"])
 @login_required
 def new_project(org_id):
@@ -148,19 +143,24 @@ def new_project(org_id):
 def project_questions(project_id):
     """ display all the questions for a project which has been paid for """
     project = db.session.query(Project).filter_by(id=project_id).first()
-    screener_q = db.session.query(ScreenerQuestion).filter_by(project_id=project_id).first()
-    screener_a = db.session.query(ScreenerAnswer).filter_by(project_id=project_id).first()
+    screener_q = (
+        db.session.query(ScreenerQuestion).filter_by(project_id=project_id).first()
+    )
+    screener_a = (
+        db.session.query(ScreenerAnswer).filter_by(project_id=project_id).first()
+    )
 
     screener_passed = False
     if screener_a and (screener_q.required_answer == screener_a.answer_option_one):
         screener_passed = True
 
-    questions = (
-        db.session.query(Question).filter_by(project_id=project_id).all()
-    )
+    questions = db.session.query(Question).filter_by(project_id=project_id).all()
 
     return render_template(
-        "question/question_details.html", questions=questions, project=project, screener_passed=screener_passed
+        "question/question_details.html",
+        questions=questions,
+        project=project,
+        screener_passed=screener_passed,
     )
 
 
@@ -195,11 +195,11 @@ def project_details(org_id, project_id, name):
     )
 
     custom_questions = (
-            db.session.query(UQuestion)
-            .filter_by(user_id=current_user.id)
-            .filter_by(project_id=project_id)
-            .all()
-        )
+        db.session.query(UQuestion)
+        .filter_by(user_id=current_user.id)
+        .filter_by(project_id=project_id)
+        .all()
+    )
 
     scale_question = (
         db.session.query(Question)
@@ -274,7 +274,6 @@ def project_details(org_id, project_id, name):
         # Organisations are restricted to ask only 10 questions then they proceed to make paymemt.
         # This calculates line items required for payment
         line_item_exists = LineItem.query.filter_by(project_id=project_item.id).first()
-
 
         if not line_item_exists:
             lineitems_1 = LineItem(
