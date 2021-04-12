@@ -194,6 +194,13 @@ def project_details(org_id, project_id, name):
         .all()
     )
 
+    custom_questions = (
+            db.session.query(UQuestion)
+            .filter_by(user_id=current_user.id)
+            .filter_by(project_id=project_id)
+            .all()
+        )
+
     scale_question = (
         db.session.query(Question)
         .filter_by(user_id=current_user.id)
@@ -264,35 +271,10 @@ def project_details(org_id, project_id, name):
         unit_amount = 2500
 
     if count_questions >= 10:
-        # Organisations are restricted to ask only 10 questions then they proceed to make paymemt. This calculates line items required for payment
-        question_item = (
-            db.session.query(Question)
-            .filter_by(user_id=current_user.id)
-            .filter_by(project_id=project_id)
-            .first()
-        )
-        screener_question_item = (
-            db.session.query(screener_questions_poly)
-            .filter_by(user_id=current_user.id)
-            .filter_by(project_id=project_id)
-            .filter_by(organisation_id=org_id)
-            .first()
-        )
-
-        scale_question_item = (
-            db.session.query(scale_questions_poly)
-            .filter_by(user_id=current_user.id)
-            .filter(project_id == project_id)
-            .first()
-        )
-        multiple_choice_question_item = (
-            db.session.query(mc_questions_poly)
-            .filter_by(user_id=current_user.id)
-            .filter_by(project_id=project_id)
-            .filter_by(organisation_id=org_id)
-            .first()
-        )
+        # Organisations are restricted to ask only 10 questions then they proceed to make paymemt.
+        # This calculates line items required for payment
         line_item_exists = LineItem.query.filter_by(project_id=project_item.id).first()
+
 
         if not line_item_exists:
             lineitems_1 = LineItem(
@@ -322,6 +304,7 @@ def project_details(org_id, project_id, name):
         project_id=project_id,
         org=org,
         project=project,
+        custom_questions=custom_questions,
         scale_question=scale_question,
         multiple_choice_question=multiple_choice_question,
         count_screener_questions=count_screener_questions,
@@ -331,22 +314,6 @@ def project_details(org_id, project_id, name):
 
 @project.route("/order/<org_id>/<int:project_id>/details/<name>/")
 def order_details(org_id, project_id, name):
-
-    screener_question = (
-        ScreenerQuestion.query.filter_by(user_id=current_user.id)
-        .filter(project_id == project_id)
-        .all()
-    )
-    scale_question = (
-        ScaleQuestion.query.filter_by(user_id=current_user.id)
-        .filter(project_id == project_id)
-        .all()
-    )
-    multiple_choice_question = (
-        MultipleChoiceQuestion.query.filter_by(user_id=current_user.id)
-        .filter(project_id == project_id)
-        .all()
-    )
     org = (
         Organisation.query.filter_by(user_id=current_user.id)
         .filter_by(id=org_id)
@@ -356,27 +323,6 @@ def order_details(org_id, project_id, name):
     project = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
-        .filter(Project.id == project_id)
-        .first()
-    )
-
-    count_screener_questions = (
-        ScreenerQuestion.query.filter_by(user_id=current_user.id)
-        .filter(project_id == project_id)
-        .count()
-    )
-
-    count_questions = (
-        Question.query.filter_by(user_id=current_user.id)
-        .filter(project_id == project_id)
-        .count()
-    )
-
-    ## prepare line items
-    project_item = (
-        db.session.query(Project)
-        .filter_by(user_id=current_user.id)
-        .filter_by(organisation_id=org_id)
         .filter_by(id=project_id)
         .first()
     )
@@ -386,28 +332,16 @@ def order_details(org_id, project_id, name):
         .filter_by(project_id=project_id)
         .first()
     )
-    paid_project = PaidProject.query.filter_by(project_id=project_item.id).first()
+    paid_project = PaidProject.query.filter_by(project_id=project.id).first()
     project_is_paid = True if paid_project else False
-    count_order = (
-        Order.query.filter_by(user_id=current_user.id)
-        .filter(project_id == project_id)
-        .count()
-    )
-    # if count_order <= 0:
-    # flash("You need to submit enough questions first.", 'error')
-    # return redirect(url_for('project.project_details', org_id=org.id, project_id=project_id, name=project.name))
+
     today = date.today()
 
     return render_template(
         "project/order_details.html",
-        screener_question=screener_question,
         project_id=project_id,
         org=org,
         project=project,
-        scale_question=scale_question,
-        multiple_choice_question=multiple_choice_question,
-        count_screener_questions=count_screener_questions,
-        count_questions=count_questions,
         order=order,
         is_paid=project_is_paid,
         today=today,

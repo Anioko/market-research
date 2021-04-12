@@ -25,184 +25,21 @@ class AddProjectForm(FlaskForm):
     submit = SubmitField("Submit")
 
 
-class AddQuestionForm(FlaskForm):
+class AddUQuestionForm(FlaskForm):
     title = StringField("Question Title", validators=[InputRequired(), Length(1, 90)])
     description = StringField(
         "Description", validators=[InputRequired(), Length(1, 90)]
     )
 
-    multiple_choice_option_one = StringField('Optional answer option e.g "Yes" ')
-
-    multiple_choice_option_two = StringField('Optional answer option e.g "No" ')
-    multiple_choice_option_three = StringField(
-        'Optional answer option. You can leave it empty if you selected "Yes" or "No" in the previous ones '
-    )
-    multiple_choice_option_four = StringField(
-        'Optional answer option. You can leave it empty if you selected "Yes" or "No" in the previous ones'
-    )
-    multiple_choice_option_five = StringField(
-        'Optional answer option. You can leave it empty if you selected "Yes" or "No" in the previous ones'
-    )
-
-    option_one = SelectField(
-        u"Please choose which answer options should be available to the respondents",
-        choices=[
-            ("Strongly Agree", "Strongly Agree"),
-            ("Agree", "Agree"),
-            ("Undecided", "Undecided"),
-            ("Disagree", "Disagree"),
-            ("Strongly Disagree", "Strongly Disagree"),
-            ("Not at all useful", "Not at all useful"),
-            ("Slightly useful", "Slightly useful"),
-            ("Moderately useful", "Moderately useful"),
-            ("Very useful", "Very useful"),
-            ("Extremely useful", "Extremely useful"),
-            ("Most useful", "Most useful"),
-            ("Least useful", "Least useful"),
-        ],
-    )
-    option_one_scale = SelectField(
-        u"Please choose the scale for this answer option",
-        choices=[
-            ("1", "1"),
-            ("2", "2"),
-            ("3", "3"),
-            ("4", "4"),
-            ("5", "5"),
-            ("7", "7"),
-            ("8", "8"),
-            ("9", "9"),
-            ("10", "10"),
-        ],
-    )
-    option_two = SelectField(
-        u"Please choose which answer options should be available to the respondents",
-        choices=[
-            ("Strongly Agree", "Strongly Agree"),
-            ("Agree", "Agree"),
-            ("Undecided", "Undecided"),
-            ("Disagree", "Disagree"),
-            ("Strongly Disagree", "Strongly Disagree"),
-            ("Not at all useful", "Not at all useful"),
-            ("Slightly useful", "Slightly useful"),
-            ("Moderately useful", "Moderately useful"),
-            ("Very useful", "Very useful"),
-            ("Extremely useful", "Extremely useful"),
-            ("Most useful", "Most useful"),
-            ("Least useful", "Least useful"),
-        ],
-    )
-    option_two_scale = SelectField(
-        u"Please choose the scale for this answer option",
-        choices=[
-            ("1", "1"),
-            ("2", "2"),
-            ("3", "3"),
-            ("4", "4"),
-            ("5", "5"),
-            ("7", "7"),
-            ("8", "8"),
-            ("9", "9"),
-            ("10", "10"),
-        ],
-    )
-    option_three = SelectField(
-        u"Please choose which answer options should be available to the respondents",
-        choices=[
-            ("Strongly Agree", "Strongly Agree"),
-            ("Agree", "Agree"),
-            ("Undecided", "Undecided"),
-            ("Disagree", "Disagree"),
-            ("Strongly Disagree", "Strongly Disagree"),
-            ("Not at all useful", "Not at all useful"),
-            ("Slightly useful", "Slightly useful"),
-            ("Moderately useful", "Moderately useful"),
-            ("Very useful", "Very useful"),
-            ("Extremely useful", "Extremely useful"),
-            ("Most useful", "Most useful"),
-            ("Least useful", "Least useful"),
-        ],
-    )
-    option_three_scale = SelectField(
-        u"Please choose the scale for this answer option",
-        choices=[
-            ("1", "1"),
-            ("2", "2"),
-            ("3", "3"),
-            ("4", "4"),
-            ("5", "5"),
-            ("7", "7"),
-            ("8", "8"),
-            ("9", "9"),
-            ("10", "10"),
-        ],
-    )
-    option_four = SelectField(
-        u"Please choose which answer options should be available to the respondents",
-        choices=[
-            ("Strongly Agree", "Strongly Agree"),
-            ("Agree", "Agree"),
-            ("Undecided", "Undecided"),
-            ("Disagree", "Disagree"),
-            ("Strongly Disagree", "Strongly Disagree"),
-            ("Not at all useful", "Not at all useful"),
-            ("Slightly useful", "Slightly useful"),
-            ("Moderately useful", "Moderately useful"),
-            ("Very useful", "Very useful"),
-            ("Extremely useful", "Extremely useful"),
-            ("Most useful", "Most useful"),
-            ("Least useful", "Least useful"),
-        ],
-    )
-    option_four_scale = SelectField(
-        u"Please choose the scale for this answer option",
-        choices=[
-            ("1", "1"),
-            ("2", "2"),
-            ("3", "3"),
-            ("4", "4"),
-            ("5", "5"),
-            ("7", "7"),
-            ("8", "8"),
-            ("9", "9"),
-            ("10", "10"),
-        ],
-    )
-    option_five = SelectField(
-        u"Please choose which answer options should be available to the respondents",
-        choices=[
-            ("Strongly Agree", "Strongly Agree"),
-            ("Agree", "Agree"),
-            ("Undecided", "Undecided"),
-            ("Disagree", "Disagree"),
-            ("Strongly Disagree", "Strongly Disagree"),
-            ("Not at all useful", "Not at all useful"),
-            ("Slightly useful", "Slightly useful"),
-            ("Moderately useful", "Moderately useful"),
-            ("Very useful", "Very useful"),
-            ("Extremely useful", "Extremely useful"),
-            ("Most useful", "Most useful"),
-            ("Least useful", "Least useful"),
-        ],
-    )
-    option_five_scale = SelectField(
-        u"Please choose the scale for this answer option",
-        choices=[
-            ("1", "1"),
-            ("2", "2"),
-            ("3", "3"),
-            ("4", "4"),
-            ("5", "5"),
-            ("7", "7"),
-            ("8", "8"),
-            ("9", "9"),
-            ("10", "10"),
-        ],
-    )
+    option_one = StringField("Option one")
+    option_two = StringField("Option Two")
+    option_three = StringField("Option Three")
+    option_four = StringField("Option Four")
+    option_five = StringField("Option Five")
     submit = SubmitField("Submit")
 
 
-class EditQuestionForm(FlaskForm):
+class EditUQuestionForm(FlaskForm):
     question = StringField('Question Title e.g "What is the your favourite color"')
     description = StringField(
         'Descriptions of the question e.g " This question is required so we can determine what colors you like" '

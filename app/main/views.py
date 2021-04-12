@@ -69,13 +69,12 @@ def cancel():
     return render_template("main/cancel.html")
 
 
-@main.route("/stripe_pay")
-def stripe_pay():
-    line_item = LineItem.query.filter_by(user_id=current_user.id).first()
+@main.route("/stripe_pay/<project_id>")
+def stripe_pay(project_id):
+    line_item = LineItem.query.filter_by(project_id=project_id).first()
     project = Project.query.filter_by(
         user_id=current_user.id, id=line_item.project_id
     ).first()
-    print(line_item.line_item_id)
     # if order.created_at == Order.created_at
     quantity = line_item.quantity
     currency = line_item.currency
@@ -130,86 +129,22 @@ def stripe_pay():
 
 @main.route("/thanks/<line_item_id>/<project_id>")
 def thanks(line_item_id, project_id):
-    screener_questions_poly = with_polymorphic(Question, [ScreenerQuestion])
-    scale_questions_poly = with_polymorphic(Question, [ScaleQuestion])
-    mc_questions_poly = with_polymorphic(Question, [MultipleChoiceQuestion])
+    order = Order.query.filter_by(user_id=current_user.id).filter_by(project_id=project_id).first()
+    project = Project.query.filter_by(id=project_id).first()
 
-    order = Order.query.filter_by(user_id=current_user.id).first()
-    project = Project.query.filter_by(user_id=current_user.id, id=project_id).first()
-    # screener_question = ScreenerQuestion.query.filter_by(user_id=current_user.id, project_id=project_id).all()
-    screener_question = (
-        db.session.query(Question)
-        .filter_by(user_id=current_user.id)
-        .filter_by(project_id=project_id)
-        .filter_by(question_type=QuestionTypes.ScreenerQuestion.value)
-        .all()
-    )
-    for question in screener_question:
-        if question:
-            screener = PaidProject(
+    project_paid = PaidProject(
                 project_id=project_id,
                 order_id=order.id,
                 project_name=project.name,
-                question=question.title,
-                description=question.description,
-                question_type=QuestionTypes.ScreenerQuestion.value,
             )
-            db.session.add(screener)
+    db.session.add(project_paid)
 
-    # scale_question = ScaleQuestion.query.filter_by(user_id=current_user.id, project_id=project_id).all()
-    scale_question = (
-        db.session.query(Question)
-        .filter_by(user_id=current_user.id)
-        .filter_by(project_id=project_id)
-        .filter_by(question_type=QuestionTypes.ScaleQuestion.value)
-        .all()
-    )
-    for question in scale_question:
-        if question:
-            scale = PaidProject(
-                project_id=project_id,
-                order_id=order.id,
-                project_name=project.name,
-                question=question.title,
-                question_type=QuestionTypes.ScaleQuestion.value,
-                description=question.description,
-            )
-            db.session.add(scale)
-
-    # multiple_choice_question = MultipleChoiceQuestion.query.filter_by(user_id=current_user.id, project_id=project_id).all()
-    multiple_choice_question = (
-        db.session.query(Question)
-        .filter_by(user_id=current_user.id)
-        .filter_by(project_id=project_id)
-        .filter_by(question_type=QuestionTypes.MultipleChoiceQuestion.value)
-        .all()
-    )
-    for question in multiple_choice_question:
-        if question:
-            multi = PaidProject(
-                project_id=project_id,
-                order_id=order.id,
-                project_name=project.name,
-                question=question.title,
-                description=question.description,
-                answer_option_one=question.multiple_choice_option_one,
-                answer_option_two=question.multiple_choice_option_two,
-                answer_option_three=question.multiple_choice_option_three,
-                answer_option_four=question.multiple_choice_option_four,
-                answer_option_five=question.multiple_choice_option_five,
-                question_type=QuestionTypes.MultipleChoiceQuestion.value,
-            )
-            db.session.add(multi)
-            db.session.commit()
-
-    return render_template("main/thanks.html", question=question)
+    return render_template("main/thanks.html")
 
 
 @main.route("/webhook/endpoint")
 def order():
-
     session = stripe.checkout.Session.list(limit=3)
-    print(session["data"])
     for stripe_session in session["data"]:
         session = stripe_session
 

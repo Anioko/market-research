@@ -55,7 +55,7 @@
                 </div>
             </h2>
             <div class="ui header" style="width: 100%; height: 50px">
-                <a class="ui teal left floated button" href="{{ url_for('project.index') }}">Create New Project</a>
+                <a class="ui teal left floated button" href="{{ url_for('question.new_question', project_id=project_id, org_id=org.id) }}">Create custom question</a>
 				{% if count_screener_questions %} <!----limit to only 10 questions per project --->
 							{% else %}
 				<a class="ui teal right floated button" href="{{ url_for('question.new_screener_question', project_id=project_id, org_id=org.id) }}">Create Screener Question</a>
@@ -126,6 +126,20 @@
 							<td>{{ mcq.multiple_choice_option_five }}</td>
                             <td>
                                 <a class="ui blue left floated button" href="{{ url_for('question.edit_multiple_choice_question', question_id=mcq.id, question=mcq.title, project_id=mcq.project_id, org_id=org.id) }}">Edit</a>            
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    {% for uq in custom_questions %}
+                        <tr>
+                            <td>{{ uq.title }}</td>
+                            <td>{{ uq.description }}</td>
+                            <td>{{ uq.multiple_choice_option_one }}</td>
+                            <td>{{ uq.multiple_choice_option_two }}</td>
+                            <td>{{ uq.multiple_choice_option_three }}</td>
+                            <td>{{ uq.multiple_choice_option_four }}</td>
+                            <td>{{ uq.multiple_choice_option_five }}</td>
+                            <td>
+                                <a class="ui blue left floated button" href="{{ url_for('question.edit_u_question', question_id=uq.id, question=uq.title, project_id=uq.project_id, org_id=org.id) }}">Edit</a>            
                             </td>
                         </tr>
                     {% endfor %}

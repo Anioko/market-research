@@ -62,50 +62,45 @@ def new_question(org_id, project_id):
         .filter(Project.id == project_id)
         .first()
     )
-    q = (
-        db.session.query(Question)
-        .filter_by(user_id=current_user.id)
-        .filter(Project.id == project_id)
+    question = (
+        ScreenerQuestion.query.filter_by(user_id=current_user.id)
+        .filter_by(project_id=project_id)
         .first()
     )
-    form = AddQuestionForm()
+    if question is None:
+        flash("Not allowed! You can have to start with a sceener question.", "error")
+        return redirect(
+            url_for(
+                "question.new_screener_question", org_id=org.id, project_id=project_id
+            )
+        )
+    print(question)
+    form = AddUQuestionForm()
     if form.validate_on_submit():
         try:
-            appt = Question(
+            appt = UQuestion(
                 project_id=project.id,
-                question_id=db.session.query(Question)
-                .filter_by(user_id=current_user.id)
-                .filter(Project.id == project_id)
-                .first(),
                 title=form.title.data,
                 description=form.description.data,
                 organisation_id=org_id,
-                multiple_choice_option_one=form.multiple_choice_option_one.data,
-                multiple_choice_option_two=form.multiple_choice_option_two.data,
-                multiple_choice_option_three=form.multiple_choice_option_three.data,
-                multiple_choice_option_four=form.multiple_choice_option_four.data,
-                multiple_choice_option_five=form.multiple_choice_option_five.data,
                 option_one=form.option_one.data,
                 option_two=form.option_two.data,
                 option_three=form.option_three.data,
                 option_four=form.option_four.data,
                 option_five=form.option_five.data,
-                option_one_scale=form.option_one_scale.data,
-                option_two_scale=form.option_two_scale.data,
-                option_three_scale=form.option_three_scale.data,
-                option_four_scale=form.option_four_scale.data,
-                option_five_scale=form.option_five_scale.data,
+                question_type=QuestionTypes.UQuestion.value,
                 user_id=current_user.id,
             )
             db.session.add(appt)
+            print(appt)
             db.session.commit()
-            flash("Successfully created".format(appt.question), "form-success")
+            flash("Successfully created".format(appt.title), "form-success")
             return redirect(
                 url_for(
                     "project.project_details",
                     org_id=org_id,
                     project_id=project_id,
-                    name=appt.question,
+                    name=appt.title,
                 )
             )
         except Exception as e:
@@ -128,23 +123,17 @@ def new_screener_question(org_id, project_id):
         .filter(Project.id == project_id)
         .first()
     )
-    screener_questions_poly = with_polymorphic(Question, [ScreenerQuestion])
-
     question = (
-        db.session.query(screener_questions_poly)
+        db.session.query(ScreenerQuestion)
         .filter_by(user_id=current_user.id)
         .filter_by(project_id=project_id)
         .first()
     )
+    print(question)
     if question is not None:
         flash("Not allowed! You can only add one screener question.", "error")
         return redirect(url_for("project.index"))
-    q = (
-        db.session.query(Question)
-        .filter_by(user_id=current_user.id)
-        .filter(Project.id == project_id)
-        .first()
-    )
+
     form = AddScreenerQuestionForm()
     if form.validate_on_submit():
         appt = ScreenerQuestion(
@@ -170,8 +159,6 @@ def new_screener_question(org_id, project_id):
             )
         )
 
-        # return redirect(url_for('question.question_details',
-        # question_id=appt.id, name=appt.name))
     else:
         flash("ERROR! Data was not added.", "error")
     return render_template(
@@ -194,10 +181,8 @@ def new_scale_question(org_id, project_id):
     project = Project.query.filter(Project.id == project_id).first()
 
     question = (
-        db.session.query(Question)
-        .filter_by(user_id=current_user.id)
-        .filter(project_id == project_id)
-        .filter_by(question_type=QuestionTypes.ScreenerQuestion.value)
+        ScreenerQuestion.query.filter_by(user_id=current_user.id)
+        .filter_by(project_id=project_id)
         .first()
     )
     if question is None:
@@ -246,88 +231,21 @@ def new_scale_question(org_id, project_id):
     )
 
 
-@question.route("/<project_id>/<question_id>/scl/create/", methods=["Get", "POST"])
+@question.route("/<org_id>/<project_id>/mcq/create/", methods=["Get", "POST"])
 @login_required
-def new_scale_option(org_id, project_id):
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=org_id)
-        .first()
-    )
+def new_multiple_choice_question(org_id, project_id):
     question = (
         ScreenerQuestion.query.filter_by(user_id=current_user.id)
-        .filter(project_id == project_id)
+        .filter_by(project_id=project_id)
         .first()
     )
     if question is None:
         flash("Not allowed! You can have to start with a sceener question.", "error")
         return redirect(
             url_for(
-                "question.new_screener_question", org_id=org.id, project_id=project_id
+                "question.new_screener_question", org_id=org_id, project_id=project_id
             )
         )
-
-    # count_questions = db.session.query(func.count(Question.id)).filter(Question.project_id == project_id).scalar()
-    # if count_questions >= 10 :
-    # flash('Not allowed! You can only add a total of 10 questions.', 'error')
-    # return redirect(url_for('project.index'))
-
-    form = AddScaleQuestionForm()
-    if form.validate_on_submit():
-        appt = ScaleQuestion(
-            project_id=project_id,
-            title=form.title.data,
-            description=form.description.data,
-            options=form.options.data,
-            user_id=current_user.id,
-        )
-        db.session.add(appt)
-
-        appts = Question(
-            project_id=project_id,
-            organisation_id=org_id,
-            title=form.title.data,
-            description=form.description.data,
-            question_type="Scale questions",
-            option_one=form.option_one.data,
-            option_two=form.option_two.data,
-            option_three=form.option_three.data,
-            option_four=form.option_four.data,
-            option_five=form.option_five.data,
-            option_one_scale=form.option_one_scale.data,
-            option_two_scale=form.option_two_scale.data,
-            option_three_scale=form.option_three_scale.data,
-            option_four_scale=form.option_four_scale.data,
-            option_five_scale=form.option_five_scale.data,
-            user_id=current_user.id,
-        )
-        db.session.add(appts)
-        project = Project.query.filter(Project.id == project_id).first()
-        db.session.commit()
-        flash("Successfully created".format(appt.title), "form-success")
-        return redirect(
-            url_for(
-                "project.project_details",
-                org_id=org_id,
-                project_id=project_id,
-                name=project.name,
-            )
-        )
-        # return redirect(url_for('question.question_details',
-        # question_id=appt.id, name=appt.name))
-    else:
-        flash("ERROR! Data was not added.", "error")
-    return render_template("question/create_scale_option.html", form=form)
-
-
-@question.route("/<org_id>/<project_id>/mcq/create/", methods=["Get", "POST"])
-@login_required
-def new_multiple_choice_question(org_id, project_id):
-    question = (
-        ScreenerQuestion.query.filter_by(user_id=current_user.id)
-        .filter(project_id == project_id)
-        .first()
-    )
     org = (
         Organisation.query.filter_by(user_id=current_user.id)
         .filter_by(id=org_id)
@@ -400,28 +318,6 @@ def question_details(project_id, name):
     return render_template(
         "question/question_details.html", questions=questions, project=project
     )
-
-
-##    answer = db.session.query(ScreenerAnswer).filter_by(user_id=current_user.id).filter(ScreenerAnswer.screener_questions_id==screener_question.id).first()
-##    scale_answer = db.session.query(ScaleAnswer).filter_by(user_id=current_user.id).all()
-##    multiple_choice_answer = db.session.query(MultipleChoiceAnswer).filter_by(user_id=current_user.id).all()
-##    if answer is None:
-##        return render_template('question/question_details.html',
-##                               project=project, question=question, screener_question=screener_question,
-##                               multiple_choice_question =multiple_choice_question,
-##                               scale_question = scale_question, screener_answer=answer,
-##                               multiple_choice_answer = multiple_choice_answer, scale_answer = scale_answer)
-##
-##    elif not answer.answer_option_one == screener_question.required_answer:
-##        flash("Sorry, you cannot proceed with answers project on this project. Choose another project", 'success')
-##        return redirect(url_for('question.index'))
-##    else:
-##        return render_template('question/question_details.html',
-##                           project=project, question=question, screener_question=screener_question,
-##                           multiple_choice_question =multiple_choice_question,
-##                           scale_question = scale_question, screener_answer=answer,
-##                           multiple_choice_answer = multiple_choice_answer, scale_answer = scale_answer)
-##
 
 
 @question.route(
@@ -507,11 +403,9 @@ def edit_scale_question(org_id, project_id, question_id, question):
     form = AddScaleQuestionForm(obj=question)
     if form.validate_on_submit():
         form.populate_obj(question)
-        db.session.add(question)
         question.project_id = project_id
         question.organisation_id = org_id
         question.title = form.title.data
-        question_id = question.id
         question.description = form.description.data
         question.option_one = form.option_one.data
         question.option_two = form.option_two.data
@@ -589,6 +483,70 @@ def edit_multiple_choice_question(org_id, project_id, question_id, question):
         project_id=project_id,
         form=form,
     )
+
+
+@question.route(
+    "/<org_id>/<project_id>/<int:question_id>/<question>/uq/edit/",
+    methods=["Get", "POST"],
+)
+@login_required
+def edit_u_question(org_id, project_id, question_id, question):
+    org = (
+        Organisation.query.filter_by(user_id=current_user.id)
+        .filter_by(id=org_id)
+        .first_or_404()
+    )
+    project = (
+        db.session.query(Project)
+        .filter_by(user_id=current_user.id)
+        .filter(Project.id == project_id)
+        .first()
+    )
+
+    question = (
+        UQuestion.query.filter_by(user_id=current_user.id)
+        .filter_by(id=question_id)
+        .first()
+    )
+    if not question:
+        abort(404)
+    if current_user.id != question.user_id:
+        abort(404)
+
+    form = EditUQuestionForm(obj=question)
+    if form.validate_on_submit():
+        form.populate_obj(question)
+        question.project_id = project_id
+        question.organisation_id = org_id
+        question.title = form.title.data
+        question.description = form.description.data
+        question.option_one = form.option_one.data
+        question.option_two = form.option_two.data
+        question.option_three = form.option_three.data
+        question.option_four = form.option_four.data
+        question.option_five = form.option_five.data
+        question.user_id = current_user.id
+        db.session.add(question)
+        db.session.commit()
+        flash("Edited.", "success")
+        # org = Organisation.query.filter_by(user_id=current_user.id).filter_by(id=org_id).first()
+        return redirect(
+            url_for(
+                "project.project_details",
+                org_id=org_id,
+                project_id=project.id,
+                name=project.name,
+            )
+        )
+    return render_template(
+        "question/create_scale_question.html",
+        question=question,
+        project_id=project_id,
+        org_id=org_id,
+        form=form,
+        project_name=project.name,
+    )
+
 
 
 @question.route("/<question_id>/delete", methods=["GET", "POST"])

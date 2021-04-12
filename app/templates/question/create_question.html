@@ -7,69 +7,58 @@
 {% endblock %}
 
 {% block content %}
-    <div class="ui stackable centered grid container">
-        <div class="twelve wide column">
-                <a class="ui basic compact button" href="{{ url_for('question.index') }}">
-                <i class="caret left icon"></i>
-                Back to Questions' List
-            </a>
-            <h2 class="ui header">
-                Create a new question
-                <div class="sub header">Add a question</div>
-            </h2>
+<div class="ui stackable centered grid container">
+  <div class="twelve wide column">
+    <a class="ui basic compact button" href="{{ url_for('question.index') }}">
+      <i class="caret left icon"></i>
+      Back to Questions' List
+    </a>
+    <h2 class="ui header">
+      Create a new question
+      <div class="sub header">Add a question</div>
+    </h2>
+    {% set flashes = {
+                    'error':   get_flashed_messages(category_filter=['form-error']),
+                    'warning': get_flashed_messages(category_filter=['form-check-email']),
+                    'info':    get_flashed_messages(category_filter=['form-info']),
+                    'success': get_flashed_messages(category_filter=['form-success'])
+      }
+    %}
 
-            {% set flashes = {
-                'error':   get_flashed_messages(category_filter=['form-error']),
-                'warning': get_flashed_messages(category_filter=['form-check-email']),
-                'info':    get_flashed_messages(category_filter=['form-info']),
-                'success': get_flashed_messages(category_filter=['form-success'])
-            } %}
-
-            {{ f.begin_form(form, flashes) }}
-            <div class="field">
-                {{ f.render_form_field(form.title) }}
-            </div>
-            <div class="field">
-                {{ f.render_form_field(form.description) }}
-            </div>
-					
-			<div class="ui placeholder segment">
-			  <div class="ui two column stackable center aligned grid">
-				<div class="ui vertical divider">And</div>
-				<div class="middle aligned row">
-				  <div class="column">
-					<div class="ui header">
-					  Question
-					</div>
-					<div class="field">
-						{{ f.render_form_field(form.option_one) }}
-					</div>
-				  </div>
-				  <div class="column">
-					<div class="ui header">
-					  Scale
-					</div>
-					<div class="field">
-					   {{ f.render_form_field(form.option_one_scale) }}
-					</div>
-				  </div>
-				</div>
-			  </div>
-			</div>	
-			</div>			
-
-
-            {{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}
-            {{ f.form_message(flashes['warning'], header='Check your email.', class='warning') }}
-            {{ f.form_message(flashes['info'], header='Information', class='info') }}
-            {{ f.form_message(flashes['success'], header='Success!', class='success') }}
-
-            {% for field in form | selectattr('type', 'equalto', 'SubmitField') %}
-                {{ f.render_form_field(field) }}
-            {% endfor %}
-
-            {{ f.end_form() }}
-
-        </div>
+  {{ f.begin_form(form, flashes) }}
+    <div class="field">
+      {{ f.render_form_field(form.title) }}
     </div>
+    <div class="field">
+      {{ f.render_form_field(form.description) }}
+    </div>
+    <div class="field">
+      {{ f.render_form_field(form.option_one) }}
+    </div>
+    <div class="field">
+      {{ f.render_form_field(form.option_two) }}
+    </div>
+    <div class="field">
+      {{ f.render_form_field(form.option_three) }}
+    </div>
+    <div class="field">
+      {{ f.render_form_field(form.option_four) }}
+    </div>
+    <div class="field">
+      {{ f.render_form_field(form.option_five) }}
+    </div>
+    {% for field in form | selectattr('type', 'equalto', 'SubmitField') %}
+      {{ f.render_form_field(field) }}
+    {% endfor %}
+  </div>
+
+
+  {{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}
+  {{ f.form_message(flashes['warning'], header='Check your email.', class='warning') }}
+  {{ f.form_message(flashes['info'], header='Information', class='info') }}
+  {{ f.form_message(flashes['success'], header='Success!', class='success') }}
+  {{ f.end_form() }}
+
+</div>
+</div>
 {% endblock %}

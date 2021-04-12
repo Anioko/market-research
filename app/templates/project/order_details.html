@@ -74,7 +74,7 @@
 				</tr>
 			  </tbody>
 			</table>
-
+			  <div id="project_id">{{order.project_id}}</div>
 			  <h3 class="ui right floated">Total Amount: {{ order.currency }} {{ order.unit_amount }}</h3>		
 			<div class="ui divider"></div>
 			{% if is_paid %}
@@ -102,9 +102,11 @@
 	  </script>
 	  <script>
 			const button = document.querySelector('#buy_now_btn');
-
+			const project_id = document.getElementById("project_id");
 			button.addEventListener('click', event => {
-				fetch('/stripe_pay')
+				const project_id = document.getElementById("project_id");
+
+				fetch('/stripe_pay/{{order.project_id}}')
 				.then((result) => { return result.json(); })
 				.then((data) => {
 					var stripe = Stripe(data.checkout_public_key);
