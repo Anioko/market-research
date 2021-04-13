@@ -24,26 +24,24 @@ answer = Blueprint("answer", __name__)
 
 
 @answer.route(
-    "/<int:project_id>/<int:question_id>/<question>/ca/add/", methods=["Get", "POST"]
+    "/<int:project_id>/<int:question_id>/<question>/ca/add/", methods=["GET", "POST"]
 )
 @login_required
 def add_custom_answer(project_id, question_id, question):
     project = db.session.query(Project).filter_by(id=project_id).first()
-
     custom_question = UQuestion.query.filter_by(id=question_id).first()
 
     form = AddUAnswerForm()
 
     if request.method == "POST":
         if form.validate_on_submit():
-            appt = UAnswer(
-                u_question_id=scale_question.id,
+            uanswer = UAnswer(
+                u_questions_id=custom_question.id,
                 user_id=current_user.id,
                 project_id=project_id,
-                option=form.option.data,
-                option_one_answer=form.option_one_answer.data,
+                option_one_answer=form.option_one.data,
             )
-            db.session.add(appt)
+            db.session.add(uanswer)
             db.session.commit()
 
             flash("Answer submitted.", "success")
@@ -65,10 +63,14 @@ def add_custom_answer(project_id, question_id, question):
 @answer.route("/<int:project_id>/<int:question_id>/add/", methods=["GET", "POST"])
 @login_required
 def add_screener_answer(project_id, question_id):
+    questions_poly = with_polymorphic(
+        Question, [ScreenerAnswer]
+    )
     screener_question = (
         db.session.query(ScreenerQuestion).filter_by(id=question_id).first()
     )
     form = AddScreenerAnswerForm()
+
 
     if request.method == "POST":
         project = db.session.query(Project).filter_by(id=project_id).first()
@@ -113,7 +115,7 @@ def add_screener_answer(project_id, question_id):
 
 
 @answer.route(
-    "/<int:project_id>/<int:question_id>/<question>/scl/add/", methods=["Get", "POST"]
+    "/<int:project_id>/<int:question_id>/<question>/scl/add/", methods=["GET", "POST"]
 )
 @login_required
 def add_scale_answer(project_id, question_id, question):

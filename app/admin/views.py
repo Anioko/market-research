@@ -262,7 +262,6 @@ def questions(page):
         Question, [ScreenerQuestion, ScaleQuestion, MultipleChoiceQuestion]
     )
     questions_result = db.session.query(Question).paginate(page, per_page=100)
-    print(questions_result)
     return render_template("admin/questions/browse.html", questions=questions_result)
 
 
