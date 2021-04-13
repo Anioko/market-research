@@ -135,6 +135,7 @@ class HerokuConfig(ProductionConfig):
     @classmethod
     def init_app(cls, app):
         ProductionConfig.init_app(app)
+        print("Hello App")
 
         # Handle proxy server headers
         from werkzeug.contrib.fixers import ProxyFix
