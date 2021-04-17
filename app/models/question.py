@@ -74,16 +74,3 @@ class Answer(db.Model):
     answer_type = db.Column(db.String(50), nullable=False)
 
     __mapper_args__ = {"polymorphic_identity": "answers", "polymorphic_on": answer_type}
-
-    """ multiple_choice_answer_one = db.Column(db.String(64), index=True)
-        multiple_choice_answer_two = db.Column(db.String(64), index=True)
-        multiple_choice_answer_three = db.Column(db.String(64), index=True)
-        multiple_choice_answer_four = db.Column(db.String(64), index=True)
-        multiple_choice_answer_five = db.Column(db.String(64), index=True)
-
-        option_one_answer = db.Column(db.String(64), index=True)
-        option_two_answer = db.Column(db.String(64), index=True)
-        option_three_answer = db.Column(db.String(64), index=True)
-        option_four_answer = db.Column(db.String(64), index=True)
-        option_five_answer = db.Column(db.String(64), index=True)
-    """

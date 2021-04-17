@@ -20,7 +20,6 @@
             </h2>
 
 			{% for question in questions %}
-				{% if screener_passed %}
 					{% if question.question_type == "scale_questions" %}
 						<div class="ui segment">
 							<div class="ui right floated horizontal list">
@@ -42,7 +41,7 @@
 								<p>{{ question.description }}</p>
 									
 							</div>
-						{% elif question.question_type == "u_questions" %}
+					{% elif question.question_type == "u_questions" %}
 							<div class="ui segment">
 								<div class="ui right floated horizontal list">
 								<a class="item" href="{{ url_for('answer.add_custom_answer', project_id=project.id, question_id=question.id, question=question.title) }}"><i class="eye icon"></i></a> 
@@ -53,21 +52,18 @@
 								<p>{{ question.description }}</p>
 								
 							</div>
-					{% endif %}
+					{% elif question.question_type == "screener_question" %}
 
-				{% else %}
-					{% if question.question_type == "screener_question" %}
-
-						<div class="ui segment">
-							<div class="ui right floated horizontal list">
-							<a class="item" href="{{ url_for('answer.add_screener_answer', project_id=project.id, question_id=question.id, question=question.title) }}"><i class="eye icon"></i></a> 
+							<div class="ui segment">
+								<div class="ui right floated horizontal list">
+								<a class="item" href="{{ url_for('answer.add_screener_answer', project_id=project.id, question_id=question.id, question=question.title) }}"><i class="eye icon"></i></a> 
+								</div>
+							<h3 class="ui left floated header">Screener Question : {{ question.title }}</h3>
+							<div class="ui clearing divider"></div>
+							<h5 class="ui header">{{ question.description }}</h5>
 							</div>
-						<h3 class="ui left floated header">Screener Question : {{ question.title }}</h3>
-						<div class="ui clearing divider"></div>
-						<h5 class="ui header">{{ question.description }}</h5>
 					{% endif %}
 
-				{% endif %}
 		{% endfor %}
 
         </div>

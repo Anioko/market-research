@@ -30,8 +30,6 @@ class AddUQuestionForm(FlaskForm):
     description = StringField(
         "Description", validators=[InputRequired(), Length(1, 90)]
     )
-
-    option_one = StringField("Option one")
     submit = SubmitField("Submit")
 
 
@@ -118,10 +116,4 @@ class AddScaleQuestionForm(FlaskForm):
             ("Semantic Differential Scale", "Semantic Differential Scale"),
         ],
     )
-    option_one = StringField("Option One")
-
-    option_two = StringField("Option Two")
-    option_three = StringField("Option Three")
-    option_four = StringField("Option Four")
-    option_five = StringField("Option Five")
     submit = SubmitField("Submit")

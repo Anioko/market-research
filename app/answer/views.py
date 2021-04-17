@@ -11,6 +11,7 @@ from flask import (
 )
 from flask_login import current_user, login_required
 from flask_rq import get_queue
+from sqlalchemy.orm import with_polymorphic
 
 from app import db
 from app.answer.forms import *
@@ -32,14 +33,14 @@ def add_custom_answer(project_id, question_id, question):
     custom_question = UQuestion.query.filter_by(id=question_id).first()
 
     form = AddUAnswerForm()
-
+    print(form)
     if request.method == "POST":
         if form.validate_on_submit():
             uanswer = UAnswer(
                 u_questions_id=custom_question.id,
                 user_id=current_user.id,
                 project_id=project_id,
-                option_one_answer=form.option_one.data,
+                answer_option=form.option_one.data,
             )
             db.session.add(uanswer)
             db.session.commit()
@@ -63,18 +64,19 @@ def add_custom_answer(project_id, question_id, question):
 @answer.route("/<int:project_id>/<int:question_id>/add/", methods=["GET", "POST"])
 @login_required
 def add_screener_answer(project_id, question_id):
-    questions_poly = with_polymorphic(
-        Question, [ScreenerAnswer]
-    )
+    screener_answer_poly = with_polymorphic(Answer, [ScreenerAnswer])
     screener_question = (
         db.session.query(ScreenerQuestion).filter_by(id=question_id).first()
     )
-    form = AddScreenerAnswerForm()
 
+    form = AddScreenerAnswerForm()
+    project = db.session.query(Project).filter_by(id=project_id).first()
+    screener_answer = (
+        db.session.query(screener_answer_poly).filter(ScreenerAnswer.project_id==project_id).first()
+    )
+    print(screener_answer.answer_option_one)
 
     if request.method == "POST":
-        project = db.session.query(Project).filter_by(id=project_id).first()
-
         if form.validate_on_submit():
             appt = ScreenerAnswer(
                 answer_option_one=form.answer_option_one.data,
@@ -110,7 +112,6 @@ def add_screener_answer(project_id, question_id):
         "answer/add_screener_answer.html",
         question=screener_question,
         form=form,
-        answer="answer",
     )
 
 
@@ -123,9 +124,7 @@ def add_scale_answer(project_id, question_id, question):
 
     scale_question = ScaleQuestion.query.filter_by(id=question_id).first()
 
-    select_answer_form = ScaleQuestion.query.filter_by(
-        id=question_id, options="5 Point Likert Scale"
-    ).first()
+    select_answer_form = ScaleQuestion.query.filter_by(id=question_id).first()
 
     if select_answer_form and (select_answer_form.options == "5 Point Likert Scale"):
         form = AddScaleAnswerForm()
@@ -138,7 +137,7 @@ def add_scale_answer(project_id, question_id, question):
                 scale_question_id=scale_question.id,
                 user_id=current_user.id,
                 project_id=project_id,
-                option=form.option.data,
+                option=form.options.data,
             )
             db.session.add(appt)
             db.session.commit()

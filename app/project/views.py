@@ -172,9 +172,9 @@ def project_details(org_id, project_id, name):
 
     check_point = (
         db.session.query(screener_questions_poly)
-        .filter_by(user_id=current_user.id)
-        .filter_by(project_id=project_id)
-        .filter_by(organisation_id=org_id)
+        .filter(ScreenerQuestion.user_id==current_user.id)
+        .filter(ScreenerQuestion.project_id==project_id)
+        .filter(ScreenerQuestion.organisation_id==org_id)
         .count()
     )
     if check_point is None:
