@@ -131,7 +131,6 @@ def new_screener_question(org_id, project_id):
         .filter_by(project_id=project_id)
         .first()
     )
-    print(question)
     if question is not None:
         flash("Not allowed! You can only add one screener question.", "error")
         return redirect(url_for("project.index"))

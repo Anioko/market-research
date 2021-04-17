@@ -111,6 +111,7 @@ def add_screener_answer(project_id, question_id):
         "answer/add_screener_answer.html",
         question=screener_question,
         form=form,
+        project_id=project_id
     )
 
 
