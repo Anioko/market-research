@@ -71,10 +71,9 @@ def add_screener_answer(project_id, question_id):
 
     form = AddScreenerAnswerForm()
     project = db.session.query(Project).filter_by(id=project_id).first()
-    screener_answer = (
+    """screener_answer = (
         db.session.query(screener_answer_poly).filter(ScreenerAnswer.project_id==project_id).first()
-    )
-    print(screener_answer.answer_option_one)
+    )"""
 
     if request.method == "POST":
         if form.validate_on_submit():
