@@ -33,7 +33,6 @@ def add_custom_answer(project_id, question_id, question):
     custom_question = UQuestion.query.filter_by(id=question_id).first()
 
     form = AddUAnswerForm()
-    print(form)
     if request.method == "POST":
         if form.validate_on_submit():
             uanswer = UAnswer(
@@ -170,7 +169,7 @@ def add_multiple_choice_answer(project_id, question_id, question):
     multiple_choice_question = MultipleChoiceQuestion.query.filter_by(
         project_id=project_id
     ).first()
-    answered = (
+    """answered = (
         db.session.query(MultipleChoiceAnswer)
         .filter_by(user_id=current_user.id)
         .filter(MultipleChoiceAnswer.multiple_choice_question_id == question_id)
@@ -183,7 +182,7 @@ def add_multiple_choice_answer(project_id, question_id, question):
             url_for(
                 "question.question_details", project_id=project.id, name=project.name
             )
-        )
+        )"""
 
     form = AddMultipleChoiceAnswerForm()
     if form.validate_on_submit():
