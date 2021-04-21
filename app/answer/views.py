@@ -29,13 +29,19 @@ answer = Blueprint("answer", __name__)
 )
 @login_required
 def add_custom_answer(project_id, question_id, question):
+    custom_answer_poly = with_polymorphic(Answer, UAnswer)
     project = db.session.query(Project).filter_by(id=project_id).first()
     custom_question = UQuestion.query.filter_by(id=question_id).first()
-    form = AddUAnswerForm()
-    
-    if request.method == "POST" and form.validate_on_submit():
-        custom_answer = UAnswer.query.filter_by(u_questions_id=question_id).filter_by(user_no=form.user_no.data).first()
 
+    form = AddUAnswerForm()
+
+    if request.method == "POST" and form.validate_on_submit():
+        custom_answer = (
+            db.session.query(custom_answer_poly)
+            .filter(custom_answer_poly.UAnswer.u_questions_id==question_id)
+            .filter(custom_answer_poly.UAnswer.user_no==form.user_no.data)
+            .first()
+        )
         if not custom_answer:
             uanswer = UAnswer(
                 u_questions_id=custom_question.id,
@@ -78,7 +84,7 @@ def add_custom_answer(project_id, question_id, question):
 @answer.route("/<int:project_id>/<int:question_id>/add/", methods=["GET", "POST"])
 @login_required
 def add_screener_answer(project_id, question_id):
-    screener_answer_poly = with_polymorphic(Answer, [ScreenerAnswer])
+    screener_answer_poly = with_polymorphic(Answer, ScreenerAnswer)
     screener_question = (
         db.session.query(ScreenerQuestion).filter_by(id=question_id).first()
     )
@@ -87,7 +93,12 @@ def add_screener_answer(project_id, question_id):
     project = db.session.query(Project).filter_by(id=project_id).first()
 
     if request.method == "POST" and form.validate_on_submit():
-        screener_answer = ScreenerAnswer.query.filter_by(screener_questions_id=question_id).filter_by(user_no=form.user_no.data).first()
+        screener_answer = (
+            db.session.query(screener_answer_poly)
+            .filter(screener_answer_poly.ScreenerAnswer.screener_questions_id==question_id)
+            .filter(screener_answer_poly.ScreenerAnswer.user_no==form.user_no.data)
+            .first()
+        )
 
         if not screener_answer:
             appt = ScreenerAnswer(
@@ -149,6 +160,8 @@ def add_screener_answer(project_id, question_id):
 )
 @login_required
 def add_scale_answer(project_id, question_id, question):
+    scale_answer_poly = with_polymorphic(Answer, ScaleAnswer)
+
     project = db.session.query(Project).filter_by(id=project_id).first()
 
     scale_question = ScaleQuestion.query.filter_by(id=question_id).first()
@@ -160,8 +173,12 @@ def add_scale_answer(project_id, question_id, question):
         form = AddSemanticAnswerForm()
 
     if request.method == "POST" and form.validate_on_submit():
-        scale_answer = ScaleAnswer.query.filter_by(scale_question_id=question_id).filter_by(user_no=form.user_no.data).first()
-
+        scale_answer = (
+            db.session.query(scale_answer_poly)
+            .filter(scale_answer_poly.ScaleAnswer.scale_question_id==question_id)
+            .filter(scale_answer_poly.ScaleAnswer.user_no==form.user_no.data)
+            .first()
+        )
         if not scale_answer:
             appt = ScaleAnswer(
                 scale_question_id=scale_question.id,
@@ -206,7 +223,7 @@ def add_scale_answer(project_id, question_id, question):
 )
 @login_required
 def add_multiple_choice_answer(project_id, question_id, question):
-
+    mcq_answer_poly = with_polymorphic(Answer, MultipleChoiceAnswer)
     project = db.session.query(Project).filter_by(id=project_id).first()
     question = LineItem.query.filter_by(project_id=project_id).all()
 
@@ -217,9 +234,9 @@ def add_multiple_choice_answer(project_id, question_id, question):
     form = AddMultipleChoiceAnswerForm()
     if request.method == "POST" and form.validate_on_submit():
         mcq_answer = (
-            MultipleChoiceAnswer.query.filter_by(project_id=project_id)
-            .filter_by(multiple_choice_question_id=question_id)
-            .filter_by(user_no=form.user_no.data)
+            db.session.query(mcq_answer_poly)
+            .filter(mcq_answer_poly.MultipleChoiceAnswer.multiple_choice_question_id==question_id)
+            .filter(mcq_answer_poly.MultipleChoiceAnswer.user_no==form.user_no.data)
             .first()
         )
         if not mcq_answer:
