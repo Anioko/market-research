@@ -9,7 +9,7 @@
 {% block content %}
     <div class="ui stackable centered grid container">
         <div class="twelve wide column">
-                <a class="ui basic compact button" href="{{ url_for('question.index') }}">
+			<a class="ui basic compact button" href="{{ url_for('project.project_questions', project_id=project_id) }}">
                 <i class="caret left icon"></i>
                 Back to Questions' List
             </a>
@@ -39,27 +39,42 @@
 			  <p></p>
 			  {% if multiple_choice_question.multiple_choice_option_one %}
 				<div class="field">
-				{{ multiple_choice_question.multiple_choice_option_one }}{{ form.multiple_choice_option_one }}
+					<div class="ui checkbox">
+						<input type="checkbox" value="{{multiple_choice_question.multiple_choice_option_one }}" name="mcq_answer"/>
+						<label>{{ multiple_choice_question.multiple_choice_option_one }}</label>
+					</div>
 				</div>
-				{% endif %}
+			 {% endif %}
 			  {% if multiple_choice_question.multiple_choice_option_two %}
 				<div class="field">
-				{{ multiple_choice_question.multiple_choice_option_two }}{{ form.multiple_choice_option_two }}
+					<div class="ui checkbox">
+						<input type="checkbox" value="{{multiple_choice_question.multiple_choice_option_two }}" name="mcq_answer">
+						<label>{{ multiple_choice_question.multiple_choice_option_two }}</label>
+					</div>
 				</div>
 				{% endif %}
 			  {% if multiple_choice_question.multiple_choice_option_three %}
-				<div class="field">
-				{{ multiple_choice_question.multiple_choice_option_three }}{{ form.multiple_choice_option_three }}
+			  <div class="field">
+				<div class="ui checkbox">
+					<input type="checkbox" value="{{multiple_choice_question.multiple_choice_option_three }}" name="mcq_answer">
+					<label>{{ multiple_choice_question.multiple_choice_option_three }}</label>
 				</div>
+			</div>
 				{% endif %}
 			  {% if multiple_choice_question.multiple_choice_option_four %}
 				<div class="field">
-				{{ multiple_choice_question.multiple_choice_option_four }}{{ form.multiple_choice_option_four }}
+					<div class="ui checkbox">
+						<input type="checkbox" value="{{multiple_choice_question.multiple_choice_option_four }}" name="mcq_answer">
+						<label>{{ multiple_choice_question.multiple_choice_option_four }}</label>
+					</div>
 				</div>
 				{% endif %}
 			  {% if multiple_choice_question.multiple_choice_option_five %}
 				<div class="field">
-				{{ multiple_choice_question.multiple_choice_option_five }}{{ form.multiple_choice_option_five }}
+					<div class="ui checkbox">
+						<input type="checkbox" value="{{multiple_choice_question.multiple_choice_option_five }}" name="mcq_answer">
+						<label>{{ multiple_choice_question.multiple_choice_option_five }}</label>
+					</div>
 				</div>
 				{% endif %}
 				{{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}

@@ -110,7 +110,7 @@ def add_screener_answer(project_id, question_id):
         "answer/add_screener_answer.html",
         question=screener_question,
         form=form,
-        project_id=project_id
+        project_id=project_id,
     )
 
 
@@ -169,34 +169,47 @@ def add_multiple_choice_answer(project_id, question_id, question):
     multiple_choice_question = MultipleChoiceQuestion.query.filter_by(
         project_id=project_id
     ).first()
-    """answered = (
-        db.session.query(MultipleChoiceAnswer)
-        .filter_by(user_id=current_user.id)
-        .filter(MultipleChoiceAnswer.multiple_choice_question_id == question_id)
-        .count()
-    )
-
-    if answered >= 1:
-        flash("This question has already been answered by you.", "success")
-        return redirect(
-            url_for(
-                "question.question_details", project_id=project.id, name=project.name
-            )
-        )"""
-
     form = AddMultipleChoiceAnswerForm()
-    if form.validate_on_submit():
-        appt = MultipleChoiceAnswer(
+    if request.method == "POST":
+        answer_options = request.form.getlist("mcq_answer")
+        answer_one = (
+            multiple_choice_question.multiple_choice_option_one
+            if multiple_choice_question.multiple_choice_option_one in answer_options
+            else None
+        )
+        answer_two = (
+            multiple_choice_question.multiple_choice_option_two
+            if multiple_choice_question.multiple_choice_option_two in answer_options
+            else None
+        )
+        answer_three = (
+            multiple_choice_question.multiple_choice_option_three
+            if multiple_choice_question.multiple_choice_option_three in answer_options
+            else None
+        )
+        answer_four = (
+            multiple_choice_question.multiple_choice_option_four
+            if multiple_choice_question.multiple_choice_option_four in answer_options
+            else None
+        )
+
+        answer_five = (
+            multiple_choice_question.multiple_choice_option_five
+            if multiple_choice_question.multiple_choice_option_five in answer_options
+            else None
+        )
+
+        mcq = MultipleChoiceAnswer(
             multiple_choice_question_id=multiple_choice_question.id,
-            multiple_choice_answer_one=form.multiple_choice_option_one.data,
-            multiple_choice_answer_two=form.multiple_choice_option_two.data,
-            multiple_choice_answer_three=form.multiple_choice_option_three.data,
-            multiple_choice_answer_four=form.multiple_choice_option_four.data,
-            multiple_choice_answer_five=form.multiple_choice_option_five.data,
+            multiple_choice_answer_one=answer_one,
+            multiple_choice_answer_two=answer_two,
+            multiple_choice_answer_three=answer_three,
+            multiple_choice_answer_four=answer_four,
+            multiple_choice_answer_five=answer_five,
             user_id=current_user.id,
             project_id=project.id,
         )
-        db.session.add(appt)
+        db.session.add(mcq)
         db.session.commit()
         flash("Answer submitted.", "success")
         return redirect(
@@ -207,5 +220,6 @@ def add_multiple_choice_answer(project_id, question_id, question):
     return render_template(
         "answer/add_multiple_choice_answer.html",
         multiple_choice_question=multiple_choice_question,
+        project_id=project_id,
         form=form,
     )
