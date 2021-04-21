@@ -31,6 +31,13 @@
             {{ f.begin_form(form, flashes) }}
 
 			{% if multiple_choice_question %}
+			<div class="ui segment">
+				<div class="sub header">{{ form.user_no.label }}</div>
+				<div class="ui clearing divider"></div>
+				<div class="field">
+					{{ form.user_no }}
+				</div>	
+			</div>
 
 			<div class="ui segment">
 			  <h3 class="ui left floated header">{{ multiple_choice_question.title }}</h3>

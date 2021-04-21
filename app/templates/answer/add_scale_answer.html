@@ -36,6 +36,13 @@
             {{ f.begin_form(form, flashes) }}
 			{% if scale_question %}
 
+            <div class="ui segment">
+				<div class="sub header">{{ form.user_no.label }}</div>
+				<div class="ui clearing divider"></div>
+				<div class="field">
+					{{ form.user_no }}
+				</div>	
+			</div>
 			<div class="ui segment">
 				<div class="ui right floated horizontal list"> 
 				</div>

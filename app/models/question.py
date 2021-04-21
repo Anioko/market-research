@@ -68,6 +68,7 @@ class Answer(db.Model):
     location_city = db.Column(db.String, index=True)
     location_state = db.Column(db.String, index=True)
     location_ip_address = db.Column(db.String, index=True)
+    user_no = db.Column(db.Integer)
 
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())

@@ -191,11 +191,6 @@ def new_scale_question(org_id, project_id):
             )
         )
 
-    # count_questions = db.session.query(func.count(Question.id)).filter(Question.project_id == project_id).scalar()
-    # if count_questions >= 10 :
-    # flash('Not allowed! You can only add a total of 10 questions.', 'error')
-    # return redirect(url_for('project.index'))
-
     form = AddScaleQuestionForm()
     if form.validate_on_submit():
         appt = ScaleQuestion(
@@ -216,8 +211,6 @@ def new_scale_question(org_id, project_id):
                 name=project.name,
             )
         )
-        # return redirect(url_for('question.question_details',
-        # question_id=appt.id, name=appt.name))
     else:
         flash("ERROR! Data was not added.", "error")
     return render_template(

@@ -29,10 +29,28 @@
                 'info':    get_flashed_messages(category_filter=['form-info']),
                 'success': get_flashed_messages(category_filter=['form-success'])
             } %}
-
-            {{ f.begin_form(form, flashes) }}
+			{{ f.begin_form(form, flashes) }}
 
 			{% if question %}
+
+			<div class="ui segment">
+				<div class="sub header">{{ form.user_no.label }}</div>
+				<div class="ui clearing divider"></div>
+				<div class="field">
+					{{ form.user_no }}
+				</div>	
+			</div>
+			<div class="ui segment">
+				<div class="sub header">Location Information</div>
+				<div class="ui clearing divider"></div>
+				<div class="field">
+					{{ form.state }}
+				</div>	
+				<div class="field">
+					{{ form.city }}
+				</div>	
+			</div>
+
 			<div class="ui segment">
 				<div class="ui right floated horizontal list"> 
 				</div>
