@@ -80,7 +80,6 @@ def new_question(org_id, project_id):
                 "question.new_screener_question", org_id=org.id, project_id=project_id
             )
         )
-    print(question)
     form = AddUQuestionForm()
     if form.validate_on_submit():
         try:
@@ -89,12 +88,10 @@ def new_question(org_id, project_id):
                 title=form.title.data,
                 description=form.description.data,
                 organisation_id=org_id,
-                option_one=form.option_one.data,
                 question_type=QuestionTypes.UQuestion.value,
                 user_id=current_user.id,
             )
             db.session.add(appt)
-            print(appt)
             db.session.commit()
             flash("Successfully created".format(appt.title), "form-success")
             return redirect(
@@ -108,7 +105,7 @@ def new_question(org_id, project_id):
         except Exception as e:
             flash("ERROR! Data was not added.", "error")
             print(e)
-    return render_template("question/create_question.html", form=form)
+    return render_template("question/create_question.html", form=form, project_id=project_id)
 
 
 @question.route("/<org_id>/<project_id>/scr/create/", methods=["GET", "POST"])
