@@ -30,10 +30,7 @@ question = Blueprint("question", __name__)
 def index(page):
     """Question dashboard page."""
     orgs = (
-        current_user.organisations
-        + Organisation.query.join(OrgStaff, Organisation.id == OrgStaff.org_id)
-        .filter(OrgStaff.user_id == current_user.id)
-        .all()
+         Organisation.query.all()
     )
     org_ids = [org.id for org in orgs]
 
