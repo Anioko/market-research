@@ -259,18 +259,18 @@ def delete_multiple_choice_questions(questions_id):
 @admin_required
 def questions(page):
     questions_poly = with_polymorphic(
-        Question, [ScreenerQuestion, ScaleQuestion, MultipleChoiceQuestion]
+        Question, '*'
     )
-    questions_result = db.session.query(Question).paginate(page, per_page=100)
+    questions_result = db.session.query(questions_poly).paginate(page, per_page=100)
+    
     return render_template("admin/questions/browse.html", questions=questions_result)
 
 
-@admin.route("/question/<int:question_id>/_delete", methods=["GET", "POST"])
+@admin.route("/question/<int:question_id>/_delete", methods=["GET"])
 @login_required
 @admin_required
 def delete_question(question_id):
     question = Question.query.filter_by(id=question_id).first()
-    db.session.delete(question)
     db.session.commit()
     flash("Successfully deleted question.", "success")
     return redirect(url_for("admin.questions"))

@@ -79,7 +79,7 @@ class PaidProject(db.Model):
     __tablename__ = "paid_projects"
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey("order.id"))
-    project_id = db.Column(db.Integer, db.ForeignKey("project.id"))
+    project_id = db.Column(db.Integer, db.ForeignKey("project.id", ondelete="CASCADE"))
     respondent_id = db.Column(db.Integer)
     project_name = db.Column(db.String(64), index=True)
 
@@ -142,7 +142,8 @@ class LineItem(db.Model):
 class UQuestion(Question):
     __tablename__ = "u_questions"
     id = db.Column(db.ForeignKey("questions.id"), primary_key=True)
-
+    created_at = db.Column(db.DateTime, index=True, default=db.func.now())
+    updated_at = db.Column(db.DateTime, nullable=True)
     u_answers = db.relationship("UAnswer", backref="uquestion", lazy="dynamic")
 
     __mapper_args__ = {"polymorphic_identity": "u_questions"}
@@ -250,6 +251,6 @@ class ScaleAnswer(Answer):
     )
 
     option = db.Column(db.String(64), index=True)
-    project_id = db.Column(db.Integer, db.ForeignKey("project.id"))
+    project_id = db.Column(db.Integer, db.ForeignKey("project.id", ondelete="CASCADE"))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
     __mapper_args__ = {"polymorphic_identity": "scale_answers"}

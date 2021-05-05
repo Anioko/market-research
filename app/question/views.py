@@ -57,13 +57,16 @@ def question_answers(question_id):
     answers = db.session.query(answers_poly).filter(
         or_(
             answers_poly.ScaleAnswer.scale_question_id == question_id,
-            answers_poly.MultipleChoiceAnswer.multiple_choice_question_id
-            == question_id,
+            answers_poly.MultipleChoiceAnswer.multiple_choice_question_id == question_id,
             answers_poly.UAnswer.u_questions_id == question_id,
             answers_poly.ScreenerAnswer.screener_questions_id == question_id,
         )
+    ).filter(
+            or_(answers_poly.ScaleAnswer.user_id == current_user.id,
+            answers_poly.MultipleChoiceAnswer.user_id == current_user.id,
+            answers_poly.UAnswer.user_id == current_user.id,
+            answers_poly.ScreenerAnswer.user_id == current_user.id,)
     )
-
     return render_template(
         "respondents/question_answers.html", answers=answers, question=question
     )
