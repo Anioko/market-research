@@ -1,0 +1,63 @@
+{% extends 'layouts/base.html' %}
+{# import 'macros/form_macros.html' as f #}
+
+
+
+{% block scripts %}
+{% endblock %}
+
+{% block content %}
+{% if current_user.is_respondent %}
+    <div class="ui stackable centered grid container">
+        <div class="twelve wide column">
+                <a class="ui basic compact button" href="{{ url_for('project.questions_answered', project_id=question.project_id) }}">
+                    <i class="caret left icon"></i>
+                    Back to Questions' List
+                </a>
+                <h3 class="ui header"> Question: {{question.title}}</h3>
+            <div class="ui segment">
+                {% for answer in answers %}
+                        {% if answer.answer_type == "scale_answers" %}
+                                <h4 class="ui left floated header">User No. {{answer.user_no}}: <br> Answer:  {{ answer.option }}</h4>
+                                <div class="ui clearing divider"></div> 
+                                                              
+                        {% elif answer.answer_type == "multiple_choice_answers" %}
+                                <h4 class="ui left floated header">User No. {{answer.user_no}}: <br><br>
+                                     Answer Choice: <br>
+                                     {{ answer.multiple_choice_answer_one if answer.multiple_choice_answer_one is not none }} <br>
+                                     {{ answer.multiple_choice_answer_two if  answer.multiple_choice_answer_two is not none }} <br>
+                                     {{ answer.multiple_choice_answer_three if  answer.multiple_choice_answer_three is not none}} <br>
+                                     {{ answer.multiple_choice_answer_four if answer.multiple_choice_answer_four is not none }} <br>
+                                     {{ answer.multiple_choice_answer_five if answer.multiple_choice_answer_five is not none}} <br>
+                                </h4>
+                                <div class="ui clearing divider"></div> 
+                                                              
+                        {% elif answer.answer_type == "screener_answers" %}
+                                <h4 class="ui left floated header">User No. {{answer.user_no}}: <br> Answer:  {{ answer.answer_option_one }}</h4>
+                                <div class="ui clearing divider"></div> 
+                        {% elif answer.answer_type == "u_answers" %}
+                                <h4 class="ui left floated header">User No. {{answer.user_no}}: <br> Answer:  {{ answer.answer_option }}</h4>
+                                <div class="ui clearing divider"></div>                                 
+                        {% endif %}
+
+                    {% else %}
+                        <h4 class="ui left floated header"> No answers for this question </h4>
+                        <div class="ui clearing divider"></div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+{% else %}
+	<div class="ui text container">
+	 <div class="ui placeholder segment">
+	  <div class="ui icon header">
+		<i class="user secret icon"></i>
+		<h1> Only respondents can access this area</h1>
+		<h3>You are either trying to access a protected page or the page doesn't exit. Use navigation bar to go back. </h3>
+	  </div>
+		</div>
+	</div>
+{% endif %}
+
+{% endblock %}

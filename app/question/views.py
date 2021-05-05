@@ -18,7 +18,7 @@ from app.question.forms import *
 from app.decorators import admin_required, respondent_required
 from app.email import send_email
 from app.models import *
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from app.constants import QuestionTypes
 
 question = Blueprint("question", __name__)
@@ -29,9 +29,7 @@ question = Blueprint("question", __name__)
 @login_required
 def index(page):
     """Question dashboard page."""
-    orgs = (
-         Organisation.query.all()
-    )
+    orgs = Organisation.query.all()
     org_ids = [org.id for org in orgs]
 
     paid_projects = (
@@ -48,6 +46,26 @@ def index(page):
     return render_template(
         "question/question_dashboard.html",
         projects=projects,
+    )
+
+
+@question.route("<question_id>/answers")
+@login_required
+def question_answers(question_id):
+    answers_poly = with_polymorphic(Answer, "*")
+    question = db.session.query(Question).filter_by(id=question_id).first()
+    answers = db.session.query(answers_poly).filter(
+        or_(
+            answers_poly.ScaleAnswer.scale_question_id == question_id,
+            answers_poly.MultipleChoiceAnswer.multiple_choice_question_id
+            == question_id,
+            answers_poly.UAnswer.u_questions_id == question_id,
+            answers_poly.ScreenerAnswer.screener_questions_id == question_id,
+        )
+    )
+
+    return render_template(
+        "respondents/question_answers.html", answers=answers, question=question
     )
 
 
@@ -102,7 +120,9 @@ def new_question(org_id, project_id):
         except Exception as e:
             flash("ERROR! Data was not added.", "error")
             print(e)
-    return render_template("question/create_question.html", form=form, project_id=project_id)
+    return render_template(
+        "question/create_question.html", form=form, project_id=project_id
+    )
 
 
 @question.route("/<org_id>/<project_id>/scr/create/", methods=["GET", "POST"])

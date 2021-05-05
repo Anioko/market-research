@@ -71,6 +71,18 @@ def index():
     )
 
 
+@project.route("/<project_id>/answered", methods=["GET", "POST"])
+@login_required
+def questions_answered(project_id):
+    project = db.session.query(Project).filter_by(id=project_id).first()
+    questions_poly = with_polymorphic(Question, [ UQuestion, MultipleChoiceQuestion, ScaleQuestion, ScreenerQuestion])
+    questions = (db.session.query(questions_poly)
+                .filter_by(project_id=project_id)
+                .all()
+                )
+    return render_template("respondents/answered.html", project=project, questions=questions)
+
+
 @project.route("/org/<org_id>")
 @login_required
 def org_projects(org_id):

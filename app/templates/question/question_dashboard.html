@@ -20,6 +20,7 @@
                         <th>No.</th>
                         <th>Project Name</th>
                         <th>View Questions</th>
+                        <th>View Questions Answered</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -29,6 +30,9 @@
                             <td>{{ project.name }}</td>
                             <td>
                                 <a class="ui blue left floated button" href="{{ url_for('project.project_questions', project_id=project.id, name=project.name) }}">View Questions</a>
+                            </td>
+                            <td>
+                                <a class="ui blue left floated button" href="{{ url_for('project.questions_answered', project_id=project.id) }}">View Questions Answers</a>
                             </td>
                         </tr>
                     {% endfor %}
