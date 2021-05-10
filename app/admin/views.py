@@ -44,7 +44,6 @@ def organaization_projects(page):
         + Organisation.query.join(OrgStaff, Organisation.id == OrgStaff.org_id)
         .all()
     )
-    print(orgs)
     projects_result = Project.query.paginate(page, per_page=100)
     return render_template("admin/orgs/organizations.html", orgs=orgs)
 
@@ -53,26 +52,25 @@ def organaization_projects(page):
 @login_required
 @admin_required
 def paid_projects_stats(org_id):
-    orgs = (
-        current_user.organisations
-        + Organisation.query.join(OrgStaff, Organisation.id == OrgStaff.org_id)
-        .all()
-    )
-    paid_projects = db.session.query(PaidProject).all()
+    org = db.session.query(Organisation).filter_by(id=org_id).first()
+    org_projects = db.session.query(Project).filter_by(organisation_id=org_id).all()
+    print(org_projects)
+    p_ids = [project.id for project in org_projects]
+    paid_projects = db.session.query(PaidProject).filter(PaidProject.project_id.in_(p_ids)).all()
     print(paid_projects)
+
     projects_stats = []
     answers_poly = with_polymorphic(Answer, '*')
     for pp in paid_projects:
         answers_count = (
             db.session.query(answers_poly)
-            .filter(answers_poly.UAnswer.project_id==pp.id)
-            .filter(answers_poly.MultipleChoiceAnswer.project_id==pp.id)
-            .filter(answers_poly.ScaleAnswer.project_id==pp.id)
-            .filter(answers_poly.ScreenerAnswer.project_id==pp.id)
+            .filter(answers_poly.UAnswer.project_id==pp.project_id)
+            .filter(answers_poly.MultipleChoiceAnswer.project_id==pp.project_id)
+            .filter(answers_poly.ScaleAnswer.project_id==pp.project_id)
+            .filter(answers_poly.ScreenerAnswer.project_id==pp.project_id)
             .count()
         )
         order_ = db.session.query(Order).filter(Order.id==pp.order_id).first()
-
         paid_p = {
             "answers_count": answers_count,
             "project": pp.project_name,
