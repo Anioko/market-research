@@ -111,6 +111,7 @@ def stripe_pay(project_id):
         line_item_id=line_item.line_item_id,
         organisation_id=project.organisation_id,
         session_id=session["id"],
+        quantity=quantity,
         start_date=today.strftime("%B %d, %Y"),
         payment_method=session["payment_method_types"],
         currency=session["currency"],
