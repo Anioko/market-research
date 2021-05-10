@@ -34,6 +34,57 @@ def index():
     return render_template("admin/index.html")
 
 
+@admin.route("/organizations/projects", defaults={"page": 1}, methods=["GET"])
+@admin.route("/organizations/projects/<int:page>", methods=["GET"])
+@login_required
+@admin_required
+def organaization_projects(page):
+    orgs = (
+        current_user.organisations
+        + Organisation.query.join(OrgStaff, Organisation.id == OrgStaff.org_id)
+        .all()
+    )
+    print(orgs)
+    projects_result = Project.query.paginate(page, per_page=100)
+    return render_template("admin/orgs/organizations.html", orgs=orgs)
+
+
+@admin.route("/orgs/paidprojects/<int:org_id>", methods=["GET"])
+@login_required
+@admin_required
+def paid_projects_stats(org_id):
+    orgs = (
+        current_user.organisations
+        + Organisation.query.join(OrgStaff, Organisation.id == OrgStaff.org_id)
+        .all()
+    )
+    paid_projects = db.session.query(PaidProject).all()
+    print(paid_projects)
+    projects_stats = []
+    answers_poly = with_polymorphic(Answer, '*')
+    for pp in paid_projects:
+        answers_count = (
+            db.session.query(answers_poly)
+            .filter(answers_poly.UAnswer.project_id==pp.id)
+            .filter(answers_poly.MultipleChoiceAnswer.project_id==pp.id)
+            .filter(answers_poly.ScaleAnswer.project_id==pp.id)
+            .filter(answers_poly.ScreenerAnswer.project_id==pp.id)
+            .count()
+        )
+        order_ = db.session.query(Order).filter(Order.id==pp.order_id).first()
+
+        paid_p = {
+            "answers_count": answers_count,
+            "project": pp.project_name,
+            "id": pp.project_id,
+            "answers_ordered": order_.quantity
+        }
+        projects_stats.append(paid_p)
+
+
+
+    return render_template("admin/orgs/projects_stats.html", projects_stats=projects_stats)
+
 @admin.route("/new-user", methods=["GET", "POST"])
 @login_required
 @admin_required
