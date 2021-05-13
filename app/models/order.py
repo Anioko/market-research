@@ -157,7 +157,6 @@ class UAnswer(Answer):
     id = db.Column(db.ForeignKey("answers.id"), primary_key=True)
     answer_option = db.Column(db.String(64), index=True)
 
-    project_id = db.Column(db.Integer, db.ForeignKey("project.id", ondelete="CASCADE"))
     u_questions_id = db.Column(
         db.Integer, db.ForeignKey("u_questions.id", ondelete="CASCADE")
     )
@@ -188,7 +187,6 @@ class ScreenerAnswer(Answer):
     __tablename__ = "screener_answers"
     id = db.Column(db.ForeignKey("answers.id"), primary_key=True)
     answer_option_one = db.Column(db.String(64), index=True)
-    project_id = db.Column(db.Integer, db.ForeignKey("project.id", ondelete="CASCADE"))
     screener_questions_id = db.Column(
         db.Integer, db.ForeignKey("screener_questions.id", ondelete="CASCADE")
     )
@@ -225,7 +223,6 @@ class MultipleChoiceAnswer(Answer):
     multiple_choice_question_id = db.Column(
         db.Integer, db.ForeignKey("multiple_choice_questions.id", ondelete="CASCADE")
     )
-    project_id = db.Column(db.Integer, db.ForeignKey("project.id", ondelete="CASCADE"))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
     __mapper_args__ = {"polymorphic_identity": "multiple_choice_answers"}
 
@@ -251,6 +248,5 @@ class ScaleAnswer(Answer):
     )
 
     option = db.Column(db.String(64), index=True)
-    project_id = db.Column(db.Integer, db.ForeignKey("project.id", ondelete="CASCADE"))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
     __mapper_args__ = {"polymorphic_identity": "scale_answers"}

@@ -6,6 +6,7 @@ from flask import (
     render_template,
     request,
     url_for,
+    jsonify
 )
 from flask_login import current_user, login_required
 from flask_rq import get_queue
@@ -51,33 +52,61 @@ def paid_projects_stats(org_id):
     org = db.session.query(Organisation).filter_by(id=org_id).first()
     org_projects = db.session.query(Project).filter_by(organisation_id=org_id).all()
     p_ids = [project.id for project in org_projects]
-    paid_projects = db.session.query(PaidProject).filter(PaidProject.project_id.in_(p_ids)).all()
+    paid_projects = (
+        db.session.query(PaidProject).filter(PaidProject.project_id.in_(p_ids)).all()
+    )
 
     projects_stats = []
-    answers_poly = with_polymorphic(Answer, '*')
+    answers_poly = with_polymorphic(Answer, "*")
     for pp in paid_projects:
         answers_count = (
-            db.session.query(answers_poly).filter(
+            db.session.query(answers_poly)
+            .filter(
                 or_(
-                    answers_poly.ScaleAnswer.project_id==pp.project_id,
-                    answers_poly.ScreenerAnswer.project_id==pp.project_id,
-                    answers_poly.MultipleChoiceAnswer.project_id==pp.project_id,
-                    answers_poly.UAnswer.project_id==pp.project_id,
+                    answers_poly.project_id == pp.project_id,
                 )
-            ).count()
+            )
+            .count()
         )
-        order_ = db.session.query(Order).filter(Order.id==pp.order_id).first()
+        order_ = db.session.query(Order).filter(Order.id == pp.order_id).first()
         paid_p = {
             "answers_count": answers_count,
             "project": pp.project_name,
             "id": pp.project_id,
-            "answers_ordered": order_.quantity
+            "answers_ordered": order_.quantity,
         }
         projects_stats.append(paid_p)
 
+    return render_template(
+        "admin/orgs/projects_stats.html", projects_stats=projects_stats
+    )
 
 
-    return render_template("admin/orgs/projects_stats.html", projects_stats=projects_stats)
+@admin.route("/questions/paid", methods=["GET"])
+@login_required
+@admin_required
+def paid_questions_stats():
+    answers_poly = with_polymorphic(Answer, '*')
+    paid_questions = db.session.query(Question).join(Project).join(PaidProject).all()
+    
+    questions_stats = []
+    for pq in paid_questions:
+        #answers = db.session.query(Answer).filter_by(question_id=pq.id).count()
+        answers = (db.session.query(answers_poly)
+            .filter(
+                or_(
+                    answers_poly.UAnswer.u_questions_id == pq.id,
+                    answers_poly.MultipleChoiceAnswer.multiple_choice_question_id==pq.id,
+                    answers_poly.ScreenerAnswer.screener_questions_id == pq.id,
+                    answers_poly.ScaleAnswer.scale_question_id == pq.id
+            )).count())
+        q_stat = {
+            "title": pq.title,
+            "answers": answers,
+        }
+        questions_stats.append(q_stat)
+    return render_template("admin/questions/paid_questions.html", questions_stats=questions_stats)
+
 
 @admin.route("/new-user", methods=["GET", "POST"])
 @login_required
@@ -303,11 +332,9 @@ def delete_multiple_choice_questions(questions_id):
 @login_required
 @admin_required
 def questions(page):
-    questions_poly = with_polymorphic(
-        Question, '*'
-    )
+    questions_poly = with_polymorphic(Question, "*")
     questions_result = db.session.query(questions_poly).paginate(page, per_page=100)
-    
+
     return render_template("admin/questions/browse.html", questions=questions_result)
 
 
