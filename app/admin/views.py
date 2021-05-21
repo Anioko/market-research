@@ -52,13 +52,15 @@ def paid_projects_stats(org_id):
     org = db.session.query(Organisation).filter_by(id=org_id).first()
     org_projects = db.session.query(Project).filter_by(organisation_id=org_id).all()
     p_ids = [project.id for project in org_projects]
-    paid_projects = (
+    """paid_projects = (
         db.session.query(PaidProject).filter(PaidProject.project_id.in_(p_ids)).all()
-    )
+    )"""
+    paid_projects = db.session.query(PaidProject, Order).join(Order).filter(Order.project_id.in_(p_ids)).all()
+    #p_ids = [project.id for project in paid_projects]
 
     projects_stats = []
     answers_poly = with_polymorphic(Answer, "*")
-    for pp in paid_projects:
+    for pp, order_ in paid_projects:
         answers_count = (
             db.session.query(answers_poly)
             .filter(
@@ -68,7 +70,6 @@ def paid_projects_stats(org_id):
             )
             .count()
         )
-        order_ = db.session.query(Order).filter(Order.id == pp.order_id).first()
         paid_p = {
             "answers_count": answers_count,
             "project": pp.project_name,
@@ -82,12 +83,12 @@ def paid_projects_stats(org_id):
     )
 
 
-@admin.route("/questions/paid", methods=["GET"])
+@admin.route("/questions/paid/<int:project_id>", methods=["GET"])
 @login_required
 @admin_required
-def paid_questions_stats():
+def paid_questions_stats(project_id):
     answers_poly = with_polymorphic(Answer, '*')
-    paid_questions = db.session.query(Question).join(Project).join(PaidProject).all()
+    paid_questions = db.session.query(Question).join(Project).join(PaidProject).filter(Project.id == project_id).all()
     
     questions_stats = []
     for pq in paid_questions:
