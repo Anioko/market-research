@@ -1,0 +1,32 @@
+{% extends 'layouts/base.html' %}
+{# import 'macros/form_macros.html' as f #}
+
+
+
+{% block scripts %}
+{% endblock %}
+
+{% block content %}
+    <div class="ui stackable centered grid container">
+        <div class="twelve wide column">
+                <a class="ui basic compact button" href="{{ url_for('project.index') }}">
+                <i class="caret left icon"></i>
+                Back to Questions Dashboard
+            </a>
+            <h2 class="ui header">
+                {{ project.name }}
+                <div class="sub header">Project's questions</div>
+            </h2>
+
+			{% for question in questions %}
+						<div class="ui segment">
+							<h3 class="ui left floated header">{{ question.title }}</h3>
+                            <a class="ui blue right floated button" href="{{ url_for('question.question_answers', question_id=question.id) }}">View answers</a>
+							<div class="ui clearing divider"></div>
+						</div>
+		    {% endfor %}
+
+        </div>
+    </div>
+
+{% endblock %}

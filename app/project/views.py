@@ -7,12 +7,13 @@ from flask import (
     request,
     url_for,
 )
+import flask_excel as excel
 from flask_login import current_user, login_required
 from flask_rq import get_queue
 from sqlalchemy.orm import with_polymorphic
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
-from app import db
+from app import answer, db
 from app.project.forms import *
 from app.main.forms import *
 from app.decorators import admin_required
@@ -47,26 +48,44 @@ def index():
         flash(" You now need create a project.", "error")
         return redirect(url_for("organisations.org_home"))
 
-    project = (
+    projects = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
         .filter(Organisation.id.in_(org_ids))
         .all()
     )
+    
+
+
     # question = db.session.query(Question).filter_by(user_id=current_user.id).filter(Question.project_id==Project.id).all()
     count_screener_questions = (
         db.session.query(func.count(ScreenerQuestion.id))
         .filter(ScreenerQuestion.project_id == Project.id)
         .scalar()
     )
-    questions_poly = with_polymorphic(
-        Question, [ScreenerQuestion, ScaleQuestion, MultipleChoiceQuestion]
-    )
+    answers_poly = with_polymorphic(Answer, '*')
+    paid_questions = db.session.query(Question).join(Project).join(PaidProject).all()
 
-    # count_questions = Question.query.filter_by(user_id=current_user.id).filter(Question.project_id == Project.id).count()
+    data_project = []
+        
+    for project in projects:
+        #answers = db.session.query(Answer).filter_by(question_id=pq.id).count()
+        answers = (db.session.query(answers_poly)
+            .filter(Answer.project_id == project.id).count())
+        project = {
+            "id": project.id,
+            "name": project.name,
+            "currency": project.currency,
+            "order_quantity": project.order_quantity,
+            "service_type": project.service_type,
+            "answers_count": answers 
+        }
+        data_project.append(project)
+    print(data_project)
+    
     return render_template(
         "project/project_dashboard.html",
-        project=project,
+        project=data_project,
         count_screener_questions=count_screener_questions,
     )
 
@@ -81,6 +100,37 @@ def questions_answered(project_id):
                 .all()
                 )
     return render_template("respondents/answered.html", project=project, questions=questions)
+
+@project.route("/<project_id>/paid/questions", methods=["GET"])
+@login_required
+def paid_questions_answered(project_id):
+    answers_poly = with_polymorphic(Answer, '*')
+    paid_questions = db.session.query(Question).join(Project).join(PaidProject).filter(Project.id == project_id).all()
+    
+    questions_stats = []
+    answers_count = []
+    for pq in paid_questions:
+        #answers = db.session.query(Answer).filter_by(question_id=pq.id).count()
+        answers = (db.session.query(answers_poly)
+            .filter(
+                or_(
+                    answers_poly.UAnswer.u_questions_id == pq.id,
+                    answers_poly.MultipleChoiceAnswer.multiple_choice_question_id==pq.id,
+                    answers_poly.ScreenerAnswer.screener_questions_id == pq.id,
+                    answers_poly.ScaleAnswer.scale_question_id == pq.id
+            )).count())
+        q_stat = {
+            "title": pq.title,
+            "answers": answers,
+        }
+        answers_count.append(answers)
+        questions_stats.append(q_stat)
+    
+    return render_template("project/questions_answered_stats.html", project=project, questions=questions_stats)
+
+@project.route("/export", methods=['GET'])
+def doexport():
+    return excel.make_response_from_records([{"Hey": "good", "ok":"yeas"}, {"Hey": "whatsup", "ok":"great"},  {"Hey": "whatsupddd", "ok":"gddreat"}], file_type="xlsx", status=200, file_name= "data")
 
 
 @project.route("/org/<org_id>")
