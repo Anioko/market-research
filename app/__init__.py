@@ -12,7 +12,6 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES
 from flask_share import Share
 from flask_ckeditor import CKEditor
 from flask_bootstrap import Bootstrap
-import flask_excel as excel
 
 from app.assets import app_css, app_js, vendor_css, vendor_js
 from config import config as Config
@@ -56,7 +55,6 @@ def create_app(config):
     login_manager.init_app(app)
     csrf.init_app(app)
     compress.init_app(app)
-    excel.init_excel(app)
     RQ(app)
     configure_uploads(app, images)
     configure_uploads(app, docs)
