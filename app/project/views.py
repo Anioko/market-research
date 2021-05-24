@@ -11,7 +11,6 @@ from flask import (
 )
 import pandas as pd
 from flask.json import jsonify
-import flask_excel as excel
 from flask_login import current_user, login_required
 from flask_rq import get_queue
 from sqlalchemy.orm import with_polymorphic
