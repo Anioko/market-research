@@ -6,7 +6,7 @@ from flask import (
     render_template,
     request,
     url_for,
-    jsonify
+    jsonify,
 )
 from flask_login import current_user, login_required
 from flask_rq import get_queue
@@ -55,8 +55,13 @@ def paid_projects_stats(org_id):
     """paid_projects = (
         db.session.query(PaidProject).filter(PaidProject.project_id.in_(p_ids)).all()
     )"""
-    paid_projects = db.session.query(PaidProject, Order).join(Order).filter(Order.project_id.in_(p_ids)).all()
-    #p_ids = [project.id for project in paid_projects]
+    paid_projects = (
+        db.session.query(PaidProject, Order)
+        .join(Order)
+        .filter(Order.project_id.in_(p_ids))
+        .all()
+    )
+    # p_ids = [project.id for project in paid_projects]
 
     projects_stats = []
     answers_poly = with_polymorphic(Answer, "*")
@@ -87,26 +92,39 @@ def paid_projects_stats(org_id):
 @login_required
 @admin_required
 def paid_questions_stats(project_id):
-    answers_poly = with_polymorphic(Answer, '*')
-    paid_questions = db.session.query(Question).join(Project).join(PaidProject).filter(Project.id == project_id).all()
-    
+    answers_poly = with_polymorphic(Answer, "*")
+    paid_questions = (
+        db.session.query(Question)
+        .join(Project)
+        .join(PaidProject)
+        .filter(Project.id == project_id)
+        .all()
+    )
+
     questions_stats = []
     for pq in paid_questions:
-        #answers = db.session.query(Answer).filter_by(question_id=pq.id).count()
-        answers = (db.session.query(answers_poly)
+        # answers = db.session.query(Answer).filter_by(question_id=pq.id).count()
+        answers = (
+            db.session.query(answers_poly)
             .filter(
                 or_(
                     answers_poly.UAnswer.u_questions_id == pq.id,
-                    answers_poly.MultipleChoiceAnswer.multiple_choice_question_id==pq.id,
+                    answers_poly.MultipleChoiceAnswer.multiple_choice_question_id
+                    == pq.id,
                     answers_poly.ScreenerAnswer.screener_questions_id == pq.id,
-                    answers_poly.ScaleAnswer.scale_question_id == pq.id
-            )).count())
+                    answers_poly.ScaleAnswer.scale_question_id == pq.id,
+                )
+            )
+            .count()
+        )
         q_stat = {
             "title": pq.title,
             "answers": answers,
         }
         questions_stats.append(q_stat)
-    return render_template("admin/questions/paid_questions.html", questions_stats=questions_stats)
+    return render_template(
+        "admin/questions/paid_questions.html", questions_stats=questions_stats
+    )
 
 
 @admin.route("/new-user", methods=["GET", "POST"])

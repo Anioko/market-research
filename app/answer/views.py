@@ -38,8 +38,8 @@ def add_custom_answer(project_id, question_id, question):
     if request.method == "POST" and form.validate_on_submit():
         custom_answer = (
             db.session.query(custom_answer_poly)
-            .filter(custom_answer_poly.UAnswer.u_questions_id==question_id)
-            .filter(custom_answer_poly.UAnswer.user_no==form.user_no.data)
+            .filter(custom_answer_poly.UAnswer.u_questions_id == question_id)
+            .filter(custom_answer_poly.UAnswer.user_no == form.user_no.data)
             .first()
         )
         if not custom_answer:
@@ -95,8 +95,10 @@ def add_screener_answer(project_id, question_id):
     if request.method == "POST" and form.validate_on_submit():
         screener_answer = (
             db.session.query(screener_answer_poly)
-            .filter(screener_answer_poly.ScreenerAnswer.screener_questions_id==question_id)
-            .filter(screener_answer_poly.ScreenerAnswer.user_no==form.user_no.data)
+            .filter(
+                screener_answer_poly.ScreenerAnswer.screener_questions_id == question_id
+            )
+            .filter(screener_answer_poly.ScreenerAnswer.user_no == form.user_no.data)
             .first()
         )
 
@@ -175,8 +177,8 @@ def add_scale_answer(project_id, question_id, question):
     if request.method == "POST" and form.validate_on_submit():
         scale_answer = (
             db.session.query(scale_answer_poly)
-            .filter(scale_answer_poly.ScaleAnswer.scale_question_id==question_id)
-            .filter(scale_answer_poly.ScaleAnswer.user_no==form.user_no.data)
+            .filter(scale_answer_poly.ScaleAnswer.scale_question_id == question_id)
+            .filter(scale_answer_poly.ScaleAnswer.user_no == form.user_no.data)
             .first()
         )
         if not scale_answer:
@@ -235,8 +237,11 @@ def add_multiple_choice_answer(project_id, question_id, question):
     if request.method == "POST" and form.validate_on_submit():
         mcq_answer = (
             db.session.query(mcq_answer_poly)
-            .filter(mcq_answer_poly.MultipleChoiceAnswer.multiple_choice_question_id==question_id)
-            .filter(mcq_answer_poly.MultipleChoiceAnswer.user_no==form.user_no.data)
+            .filter(
+                mcq_answer_poly.MultipleChoiceAnswer.multiple_choice_question_id
+                == question_id
+            )
+            .filter(mcq_answer_poly.MultipleChoiceAnswer.user_no == form.user_no.data)
             .first()
         )
         if not mcq_answer:

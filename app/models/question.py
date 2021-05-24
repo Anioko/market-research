@@ -70,7 +70,9 @@ class Answer(db.Model):
     location_ip_address = db.Column(db.String, index=True)
     user_no = db.Column(db.Integer)
     project_id = db.Column(db.Integer, db.ForeignKey("project.id", ondelete="CASCADE"))
-    question_id = db.Column(db.Integer, db.ForeignKey("questions.id", ondelete="CASCADE"))
+    question_id = db.Column(
+        db.Integer, db.ForeignKey("questions.id", ondelete="CASCADE")
+    )
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
     answer_type = db.Column(db.String(50), nullable=False)

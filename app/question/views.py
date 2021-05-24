@@ -54,32 +54,55 @@ def index(page):
 def question_answers(question_id):
     answers_poly = with_polymorphic(Answer, "*")
     question = db.session.query(Question).filter_by(id=question_id).first()
-    answers = db.session.query(answers_poly).filter(
-        or_(
-            answers_poly.ScaleAnswer.scale_question_id == question_id,
-            answers_poly.MultipleChoiceAnswer.multiple_choice_question_id == question_id,
-            answers_poly.UAnswer.u_questions_id == question_id,
-            answers_poly.ScreenerAnswer.screener_questions_id == question_id,
+    answers = (
+        db.session.query(answers_poly)
+        .filter(
+            or_(
+                answers_poly.ScaleAnswer.scale_question_id == question_id,
+                answers_poly.MultipleChoiceAnswer.multiple_choice_question_id
+                == question_id,
+                answers_poly.UAnswer.u_questions_id == question_id,
+                answers_poly.ScreenerAnswer.screener_questions_id == question_id,
+            )
         )
-    ).filter(
-            or_(answers_poly.ScaleAnswer.user_id == current_user.id,
-            answers_poly.MultipleChoiceAnswer.user_id == current_user.id,
-            answers_poly.UAnswer.user_id == current_user.id,
-            answers_poly.ScreenerAnswer.user_id == current_user.id,)
+        .filter(
+            or_(
+                answers_poly.ScaleAnswer.user_id == current_user.id,
+                answers_poly.MultipleChoiceAnswer.user_id == current_user.id,
+                answers_poly.UAnswer.user_id == current_user.id,
+                answers_poly.ScreenerAnswer.user_id == current_user.id,
+            )
+        )
     )
+
     return render_template(
         "respondents/question_answers.html", answers=answers, question=question
     )
 
 
-@question.route("/<org_id>/<project_id>/question/create/", methods=["GET", "POST"])
+@question.route("/user/<question_id>/answers")
 @login_required
-def new_question(org_id, project_id):
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=org_id)
-        .first_or_404()
+def user_question_answers(question_id):
+    answers_poly = with_polymorphic(Answer, "*")
+    question = db.session.query(Question).filter_by(user_id=current_user.id).filter_by(id=question_id).first()
+    answers = db.session.query(answers_poly).filter(
+        or_(
+            answers_poly.ScaleAnswer.scale_question_id == question_id,
+            answers_poly.MultipleChoiceAnswer.multiple_choice_question_id
+            == question_id,
+            answers_poly.UAnswer.u_questions_id == question_id,
+            answers_poly.ScreenerAnswer.screener_questions_id == question_id,
+        )
     )
+
+    return render_template(
+        "project/user_question_answers.html", answers=answers, question=question
+    )
+
+
+@question.route("/<project_id>/question/create/", methods=["GET", "POST"])
+@login_required
+def new_question(project_id):
     project = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
@@ -95,7 +118,9 @@ def new_question(org_id, project_id):
         flash("Not allowed! You can have to start with a sceener question.", "error")
         return redirect(
             url_for(
-                "question.new_screener_question", org_id=org.id, project_id=project_id
+                "question.new_screener_question",
+                org_id=project.organisation_id,
+                project_id=project_id,
             )
         )
     form = AddUQuestionForm()
@@ -105,7 +130,7 @@ def new_question(org_id, project_id):
                 project_id=project.id,
                 title=form.title.data,
                 description=form.description.data,
-                organisation_id=org_id,
+                organisation_id=project.organisation_id,
                 question_type=QuestionTypes.UQuestion.value,
                 user_id=current_user.id,
             )
@@ -115,7 +140,6 @@ def new_question(org_id, project_id):
             return redirect(
                 url_for(
                     "project.project_details",
-                    org_id=org_id,
                     project_id=project_id,
                     name=appt.title,
                 )
@@ -128,14 +152,9 @@ def new_question(org_id, project_id):
     )
 
 
-@question.route("/<org_id>/<project_id>/scr/create/", methods=["GET", "POST"])
+@question.route("/<project_id>/scr/create/", methods=["GET", "POST"])
 @login_required
-def new_screener_question(org_id, project_id):
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=org_id)
-        .first_or_404()
-    )
+def new_screener_question(project_id):
     project = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
@@ -171,7 +190,6 @@ def new_screener_question(org_id, project_id):
         return redirect(
             url_for(
                 "project.project_details",
-                org_id=org_id,
                 project_id=project_id,
                 name=appt.title,
             )
@@ -184,18 +202,12 @@ def new_screener_question(org_id, project_id):
         form=form,
         project_id=project_id,
         project_name=project.name,
-        org_id=org_id,
     )
 
 
-@question.route("/<org_id>/<project_id>/scl/create/", methods=["Get", "POST"])
+@question.route("/<project_id>/scl/create/", methods=["Get", "POST"])
 @login_required
-def new_scale_question(org_id, project_id):
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=org_id)
-        .first()
-    )
+def new_scale_question(project_id):
     project = Project.query.filter(Project.id == project_id).first()
 
     question = (
@@ -206,9 +218,7 @@ def new_scale_question(org_id, project_id):
     if question is None:
         flash("Not allowed! You can have to start with a sceener question.", "error")
         return redirect(
-            url_for(
-                "question.new_screener_question", org_id=org.id, project_id=project_id
-            )
+            url_for("question.new_screener_question", project_id=project_id)
         )
 
     form = AddScaleQuestionForm()
@@ -226,7 +236,6 @@ def new_scale_question(org_id, project_id):
         return redirect(
             url_for(
                 "project.project_details",
-                org_id=org_id,
                 project_id=project_id,
                 name=project.name,
             )
@@ -238,13 +247,12 @@ def new_scale_question(org_id, project_id):
         form=form,
         project_id=project_id,
         project_name=project.name,
-        org_id=org_id,
     )
 
 
-@question.route("/<org_id>/<project_id>/mcq/create/", methods=["Get", "POST"])
+@question.route("/<project_id>/mcq/create/", methods=["Get", "POST"])
 @login_required
-def new_multiple_choice_question(org_id, project_id):
+def new_multiple_choice_question(project_id):
     question = (
         ScreenerQuestion.query.filter_by(user_id=current_user.id)
         .filter_by(project_id=project_id)
@@ -253,23 +261,14 @@ def new_multiple_choice_question(org_id, project_id):
     if question is None:
         flash("Not allowed! You can have to start with a sceener question.", "error")
         return redirect(
-            url_for(
-                "question.new_screener_question", org_id=org_id, project_id=project_id
-            )
+            url_for("question.new_screener_question", project_id=project_id)
         )
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=org_id)
-        .first()
-    )
     project = Project.query.filter(Project.id == project_id).first()
 
     if question is None:
         flash("Not allowed! You can have to start with a sceener question.", "error")
         return redirect(
-            url_for(
-                "question.new_screener_question", org_id=org.id, project_id=project_id
-            )
+            url_for("question.new_screener_question", project_id=project_id)
         )
 
     # count_questions = db.session.query(func.count(Question.id)).filter(Question.project_id == project_id).scalar()
@@ -277,11 +276,6 @@ def new_multiple_choice_question(org_id, project_id):
     # flash('Not allowed! You can only add a total of 10 questions.', 'error')
     # return redirect(url_for('project.index'))
 
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=org_id)
-        .first_or_404()
-    )
     form = AddMultipleChoiceQuestionForm()
     if form.validate_on_submit():
         appt = MultipleChoiceQuestion(
@@ -301,7 +295,6 @@ def new_multiple_choice_question(org_id, project_id):
         return redirect(
             url_for(
                 "project.project_details",
-                org_id=org_id,
                 project_id=project_id,
                 name=project.name,
             )
@@ -316,7 +309,6 @@ def new_multiple_choice_question(org_id, project_id):
         form=form,
         project_id=project_id,
         project_name=project.name,
-        org_id=org_id,
     )
 
 
@@ -332,17 +324,11 @@ def question_details(project_id, name):
 
 
 @question.route(
-    "/<org_id>/<project_id>/<int:question_id>/scr/edit/",
+    "/<project_id>/<int:question_id>/scr/edit/",
     methods=["GET", "POST"],
 )
 @login_required
-def edit_screener_question(org_id, project_id, question_id):
-
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=org_id)
-        .first_or_404()
-    )
+def edit_screener_question(project_id, question_id):
     project = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
@@ -369,7 +355,6 @@ def edit_screener_question(org_id, project_id, question_id):
         return redirect(
             url_for(
                 "project.project_details",
-                org_id=org_id,
                 project_id=project.id,
                 name=project.name,
             )
@@ -378,22 +363,16 @@ def edit_screener_question(org_id, project_id, question_id):
         "question/edit_screener_question.html",
         question=question,
         form=form,
-        org=org,
         project=project,
     )
 
 
 @question.route(
-    "/<org_id>/<project_id>/<int:question_id>/<question>/scl/edit/",
+    "<project_id>/<int:question_id>/<question>/scl/edit/",
     methods=["Get", "POST"],
 )
 @login_required
-def edit_scale_question(org_id, project_id, question_id, question):
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=org_id)
-        .first_or_404()
-    )
+def edit_scale_question(project_id, question_id, question):
     project = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
@@ -415,14 +394,11 @@ def edit_scale_question(org_id, project_id, question_id, question):
     if form.validate_on_submit():
         form.populate_obj(question)
         question.project_id = project_id
-        question.organisation_id = org_id
+        question.organisation_id = project.organisation_id
         question.title = form.title.data
         question.description = form.description.data
-        question.option_one = form.option_one.data
-        question.option_two = form.option_two.data
-        question.option_three = form.option_three.data
-        question.option_four = form.option_four.data
-        question.option_five = form.option_five.data
+        question.options = form.options.data
+
         question.user_id = current_user.id
         db.session.add(question)
         db.session.commit()
@@ -431,7 +407,6 @@ def edit_scale_question(org_id, project_id, question_id, question):
         return redirect(
             url_for(
                 "project.project_details",
-                org_id=org_id,
                 project_id=project.id,
                 name=project.name,
             )
@@ -440,23 +415,17 @@ def edit_scale_question(org_id, project_id, question_id, question):
         "question/create_scale_question.html",
         question=question,
         project_id=project_id,
-        org_id=org_id,
         form=form,
         project_name=project.name,
     )
 
 
 @question.route(
-    "/<org_id>/<project_id>/<int:question_id>/<question>/mcq/edit/",
+    "/<project_id>/<int:question_id>/<question>/mcq/edit/",
     methods=["Get", "POST"],
 )
 @login_required
-def edit_multiple_choice_question(org_id, project_id, question_id, question):
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=org_id)
-        .first_or_404()
-    )
+def edit_multiple_choice_question(project_id, question_id, question):
     project = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
@@ -483,7 +452,6 @@ def edit_multiple_choice_question(org_id, project_id, question_id, question):
         return redirect(
             url_for(
                 "project.project_details",
-                org_id=org_id,
                 project_id=project.id,
                 name=project.name,
             )
@@ -497,16 +465,11 @@ def edit_multiple_choice_question(org_id, project_id, question_id, question):
 
 
 @question.route(
-    "/<org_id>/<project_id>/<int:question_id>/<question>/uq/edit/",
+    "/<project_id>/<int:question_id>/<question>/uq/edit/",
     methods=["Get", "POST"],
 )
 @login_required
-def edit_u_question(org_id, project_id, question_id, question):
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=org_id)
-        .first_or_404()
-    )
+def edit_u_question(project_id, question_id, question):
     project = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
@@ -528,7 +491,7 @@ def edit_u_question(org_id, project_id, question_id, question):
     if form.validate_on_submit():
         form.populate_obj(question)
         question.project_id = project_id
-        question.organisation_id = org_id
+        question.organisation_id = (project.organisation_id,)
         question.title = form.title.data
         question.description = form.description.data
         question.option_one = form.option_one.data
@@ -540,7 +503,6 @@ def edit_u_question(org_id, project_id, question_id, question):
         return redirect(
             url_for(
                 "project.project_details",
-                org_id=org_id,
                 project_id=project.id,
                 name=project.name,
             )
@@ -549,7 +511,6 @@ def edit_u_question(org_id, project_id, question_id, question):
         "question/create_question.html",
         question=question,
         project_id=project_id,
-        org_id=org_id,
         form=form,
         project_name=project.name,
     )

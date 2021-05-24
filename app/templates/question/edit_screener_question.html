@@ -48,7 +48,7 @@
 
             {{ f.end_form() }}
 			
-		<a class="ui primary right floated button" href="{{ url_for('project.project_details', org_id=org.id, project_id=project.id, name=project.name) }}">Back</a>
+		<a class="ui primary right floated button" href="{{ url_for('project.project_details', project_id=project.id, name=project.name) }}">Back</a>
         </div>
     </div>
 {% endblock %}

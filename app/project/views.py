@@ -1,3 +1,4 @@
+import io
 from flask import (
     Blueprint,
     abort,
@@ -6,7 +7,10 @@ from flask import (
     render_template,
     request,
     url_for,
+    Response
 )
+import pandas as pd
+from flask.json import jsonify
 import flask_excel as excel
 from flask_login import current_user, login_required
 from flask_rq import get_queue
@@ -29,24 +33,29 @@ project = Blueprint("project", __name__)
 
 
 @project.route("/")
+@project.route("/org/<org_id>")
 @login_required
-def index():
+def index(org_id=None):
     """project dashboard page."""
-    check_point_org = Organisation.query.filter_by(user_id=current_user.id).first()
-    orgs = Organisation.query.filter_by(user_id=current_user.id).all()
-    org_ids = [_org.id for _org in orgs]
-    if check_point_org is None:
-        flash(" You now need to add details of your organisation.", "error")
-        return redirect(url_for("organisations.org_home"))
+    org_ids = []
+    if not org_id:
+        check_point_org = Organisation.query.filter_by(user_id=current_user.id).first()
+        orgs = Organisation.query.filter_by(user_id=current_user.id).all()
+        org_ids = [_org.id for _org in orgs]
+        if check_point_org is None:
+            flash(" You now need to add details of your organisation.", "error")
+            return redirect(url_for("organisations.org_home"))
 
-    check_point_project = (
-        Project.query.filter_by(user_id=current_user.id)
-        .filter(Organisation.id.in_(org_ids))
-        .first()
-    )
-    if check_point_project is None:
-        flash(" You now need create a project.", "error")
-        return redirect(url_for("organisations.org_home"))
+        check_point_project = (
+            Project.query.filter_by(user_id=current_user.id)
+            .filter(Organisation.id.in_(org_ids))
+            .first()
+        )
+        if check_point_project is None:
+            flash(" You now need create a project.", "error")
+            return redirect(url_for("organisations.org_home"))
+    else:
+        org_ids = [org_id]
 
     projects = (
         db.session.query(Project)
@@ -54,35 +63,34 @@ def index():
         .filter(Organisation.id.in_(org_ids))
         .all()
     )
-    
 
-
-    # question = db.session.query(Question).filter_by(user_id=current_user.id).filter(Question.project_id==Project.id).all()
     count_screener_questions = (
         db.session.query(func.count(ScreenerQuestion.id))
         .filter(ScreenerQuestion.project_id == Project.id)
         .scalar()
     )
-    answers_poly = with_polymorphic(Answer, '*')
+    answers_poly = with_polymorphic(Answer, "*")
     paid_questions = db.session.query(Question).join(Project).join(PaidProject).all()
 
     data_project = []
-        
+
     for project in projects:
-        #answers = db.session.query(Answer).filter_by(question_id=pq.id).count()
-        answers = (db.session.query(answers_poly)
-            .filter(Answer.project_id == project.id).count())
+        # answers = db.session.query(Answer).filter_by(question_id=pq.id).count()
+        answers = (
+            db.session.query(answers_poly)
+            .filter(Answer.project_id == project.id)
+            .count()
+        )
         project = {
             "id": project.id,
             "name": project.name,
             "currency": project.currency,
             "order_quantity": project.order_quantity,
             "service_type": project.service_type,
-            "answers_count": answers 
+            "answers_count": answers,
         }
         data_project.append(project)
-    print(data_project)
-    
+
     return render_template(
         "project/project_dashboard.html",
         project=data_project,
@@ -94,78 +102,113 @@ def index():
 @login_required
 def questions_answered(project_id):
     project = db.session.query(Project).filter_by(id=project_id).first()
-    questions_poly = with_polymorphic(Question, [ UQuestion, MultipleChoiceQuestion, ScaleQuestion, ScreenerQuestion])
-    questions = (db.session.query(questions_poly)
-                .filter_by(project_id=project_id)
-                .all()
-                )
-    return render_template("respondents/answered.html", project=project, questions=questions)
+    questions_poly = with_polymorphic(
+        Question, [UQuestion, MultipleChoiceQuestion, ScaleQuestion, ScreenerQuestion]
+    )
+    questions = db.session.query(questions_poly).filter_by(project_id=project_id).all()
+    return render_template(
+        "respondents/answered.html", project=project, questions=questions
+    )
+
 
 @project.route("/<project_id>/paid/questions", methods=["GET"])
 @login_required
 def paid_questions_answered(project_id):
-    answers_poly = with_polymorphic(Answer, '*')
-    paid_questions = db.session.query(Question).join(Project).join(PaidProject).filter(Project.id == project_id).all()
-    
+    answers_poly = with_polymorphic(Answer, "*")
+    paid_questions = (
+        db.session.query(Question)
+        .join(Project)
+        .join(PaidProject)
+        .filter(Project.id == project_id)
+        .all()
+    )
+    project = db.session.query(Project).filter_by(id=project_id).first()
+
     questions_stats = []
     answers_count = []
     for pq in paid_questions:
-        #answers = db.session.query(Answer).filter_by(question_id=pq.id).count()
-        answers = (db.session.query(answers_poly)
+        # answers = db.session.query(Answer).filter_by(question_id=pq.id).count()
+        answers = (
+            db.session.query(answers_poly)
             .filter(
                 or_(
                     answers_poly.UAnswer.u_questions_id == pq.id,
-                    answers_poly.MultipleChoiceAnswer.multiple_choice_question_id==pq.id,
+                    answers_poly.MultipleChoiceAnswer.multiple_choice_question_id
+                    == pq.id,
                     answers_poly.ScreenerAnswer.screener_questions_id == pq.id,
-                    answers_poly.ScaleAnswer.scale_question_id == pq.id
-            )).count())
-        q_stat = {
-            "title": pq.title,
-            "answers": answers,
-        }
+                    answers_poly.ScaleAnswer.scale_question_id == pq.id,
+                )
+            )
+            .count()
+        )
+        q_stat = {"title": pq.title, "answers": answers, "id": pq.id}
         answers_count.append(answers)
         questions_stats.append(q_stat)
-    
-    return render_template("project/questions_answered_stats.html", project=project, questions=questions_stats)
-
-@project.route("/export", methods=['GET'])
-def doexport():
-    return excel.make_response_from_records([{"Hey": "good", "ok":"yeas"}, {"Hey": "whatsup", "ok":"great"},  {"Hey": "whatsupddd", "ok":"gddreat"}], file_type="xlsx", status=200, file_name= "data")
 
 
-@project.route("/org/<org_id>")
-@login_required
-def org_projects(org_id):
-    """project dashboard page."""
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=org_id)
-        .first()
+    return render_template(
+        "project/questions_answered_stats.html",
+        project=project,
+        questions=questions_stats,
     )
 
-    project = (
-        db.session.query(Project)
-        .filter_by(user_id=current_user.id)
-        .filter_by(organisation_id=org_id)
+
+@project.route("/export/<id>", methods=["GET"])
+def export(id):
+    answers_poly = with_polymorphic(Answer, "*")
+    paid_questions = (
+        db.session.query(Question)
+        .join(Project)
+        .join(PaidProject)
+        .filter(Project.id == id)
         .all()
     )
-    # question = db.session.query(Question).filter_by(user_id=current_user.id).filter(Question.project_id==Project.id).all()
-    count_screener_questions = (
-        db.session.query(func.count(ScreenerQuestion.id))
-        .filter(ScreenerQuestion.project_id == Project.id)
-        .scalar()
-    )
-    questions_poly = with_polymorphic(
-        Question, [ScreenerQuestion, ScaleQuestion, MultipleChoiceQuestion]
-    )
 
-    # count_questions = Question.query.filter_by(user_id=current_user.id).filter(Question.project_id == Project.id).count()
-    return render_template(
-        "project/project_dashboard.html",
-        project=project,
-        org=org,
-        count_screener_questions=count_screener_questions,
-    )
+    questions_stats = []
+    answers_count = []
+    for pq in paid_questions:
+        answers = (
+            db.session.query(answers_poly)
+            .filter(
+                or_(
+                    answers_poly.UAnswer.u_questions_id == pq.id,
+                    answers_poly.MultipleChoiceAnswer.multiple_choice_question_id
+                    == pq.id,
+                    answers_poly.ScreenerAnswer.screener_questions_id == pq.id,
+                    answers_poly.ScaleAnswer.scale_question_id == pq.id,
+                )
+            )
+            .all()
+        )
+        ex_answers = []
+        for answer in answers:
+            if answer.answer_type == "scale_answers":
+                ex_answers.append(answer.option)
+            elif answer.answer_type == "screener_answers":
+                ex_answers.append(answer.answer_option_one)
+            elif answer.answer_type == "multiple_choice_answers":
+                mcq_list = [answer.multiple_choice_answer_one,
+                            answer.multiple_choice_answer_two,
+                            answer.multiple_choice_answer_three,
+                            answer.multiple_choice_answer_four,
+                            answer.multiple_choice_answer_five]
+                data = list(filter(None, mcq_list))
+                ex_answers.append(data)
+            elif answer.answer_type == "u_answers":
+                ex_answers.append(answer.answer_option)
+
+        q_stat = { "id": pq.id, "question": pq.title, "answers": ex_answers}
+        answers_count.append(answers)
+        questions_stats.append(q_stat)
+
+    bio = io.BytesIO()
+    pd.DataFrame(questions_stats).to_excel(bio)
+    bio.seek(0)
+
+    headers = {"Content-disposition": "attachment; filename=data.xlsx"}
+    mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+    return Response(bio, mimetype=mimetype, headers=headers, direct_passthrough=True)
 
 
 @project.route("/<org_id>/create/", methods=["Get", "POST"])
@@ -226,25 +269,22 @@ def project_questions(project_id):
     )
 
 
-@project.route("/<org_id>/<int:project_id>/details/<name>/", methods=["GET", "POST"])
-def project_details(org_id, project_id, name):
+@project.route("/<int:project_id>/details/<name>/", methods=["GET", "POST"])
+def project_details(project_id, name):
     screener_questions_poly = with_polymorphic(Question, [ScreenerQuestion])
     scale_questions_poly = with_polymorphic(Question, [ScaleQuestion])
     mc_questions_poly = with_polymorphic(Question, [MultipleChoiceQuestion])
 
     check_point = (
         db.session.query(screener_questions_poly)
-        .filter(ScreenerQuestion.user_id==current_user.id)
-        .filter(ScreenerQuestion.project_id==project_id)
-        .filter(ScreenerQuestion.organisation_id==org_id)
+        .filter(ScreenerQuestion.user_id == current_user.id)
+        .filter(ScreenerQuestion.project_id == project_id)
         .count()
     )
     if check_point is None:
         flash(" You now need to add one screener question.", "success")
         return redirect(
-            url_for(
-                "question.new_screener_question", org_id=org.id, project_id=project.id
-            )
+            url_for("question.new_screener_question", project_id=project_id)
         )
 
     # screener_question = ScreenerQuestion.query.filter_by(user_id=current_user.id).filter(project_id ==project_id).all()
@@ -277,12 +317,6 @@ def project_details(org_id, project_id, name):
         .filter_by(question_type=QuestionTypes.MultipleChoiceQuestion.value)
         .all()
     )
-
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=org_id)
-        .first_or_404()
-    )
     project = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
@@ -300,7 +334,6 @@ def project_details(org_id, project_id, name):
         .filter_by(project_id=project_id)
         .count()
     )
-    print(f"Project ID: {project_id}, Count Questions: {count_questions} ")
 
     ## prepare line items
     project_item = (
@@ -353,7 +386,6 @@ def project_details(org_id, project_id, name):
         return redirect(
             url_for(
                 "project.order_details",
-                org_id=org.id,
                 project_id=project_id,
                 name=project.name,
             )
@@ -363,7 +395,6 @@ def project_details(org_id, project_id, name):
         "project/project_details.html",
         screener_question=screener_question,
         project_id=project_id,
-        org=org,
         project=project,
         custom_questions=custom_questions,
         scale_question=scale_question,
@@ -373,20 +404,15 @@ def project_details(org_id, project_id, name):
     )
 
 
-@project.route("/order/<org_id>/<int:project_id>/details/<name>/")
-def order_details(org_id, project_id, name):
-    org = (
-        Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=org_id)
-        .first_or_404()
-    )
-
+@project.route("/order/<int:project_id>/details/<name>/")
+def order_details(project_id, name):
     project = (
         db.session.query(Project)
         .filter_by(user_id=current_user.id)
         .filter_by(id=project_id)
         .first()
     )
+    org = Organisation.query.filter_by(id=project.organisation_id).first_or_404()
     order = (
         db.session.query(LineItem)
         .filter_by(user_id=current_user.id)
@@ -409,9 +435,9 @@ def order_details(org_id, project_id, name):
     )
 
 
-@project.route("/<org_id>/<int:project_id>/<name>/edit", methods=["Get", "POST"])
+@project.route("/<int:project_id>/<name>/edit", methods=["Get", "POST"])
 @login_required
-def edit_project(org_id, project_id, name):
+def edit_project(project_id, name):
 
     project = (
         Project.query.filter_by(user_id=current_user.id)
@@ -425,7 +451,7 @@ def edit_project(org_id, project_id, name):
 
     org = (
         Organisation.query.filter_by(user_id=current_user.id)
-        .filter_by(id=org_id)
+        .filter_by(id=project.organisation_id)
         .first()
     )
     order = Order.query.filter(Order.project_id == project_id).first()
