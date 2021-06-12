@@ -69,17 +69,23 @@ def register():
         db.session.commit()
         token = user.generate_confirmation_token()
         confirm_link = url_for("account.confirm", token=token, _external=True)
-        get_queue().enqueue(
-            send_email,
-            recipient=user.email,
-            subject="Confirm Your Account",
-            template="account/email/confirm",
-            user=user,
-            confirm_link=confirm_link,
-        )
-        flash("A confirmation link has been sent to {}.".format(user.email), "warning")
-        print("The Email has been sent")
-        return redirect(url_for("main.index"))
+        try:
+            send_email(
+                recipient=user.email,
+                subject="Confirm Your Account",
+                template="account/email/confirm",
+                user=user,
+                confirm_link=confirm_link
+            )
+            flash("A confirmation link has been sent to {}.".format(user.email), "warning")
+            print("The Email has been sent")
+            return redirect(url_for("main.index"))
+        except Exception as e:
+            print(e)
+            flash("Failed to send confirmation email to {}.".format(user.email), "error")
+            print("The Email has been sent")
+            return redirect(url_for("main.index"))
+
     return render_template("account/register.html", form=form)
 
 
@@ -110,20 +116,34 @@ def reset_password_request():
         if user:
             token = user.generate_password_reset_token()
             reset_link = url_for("account.reset_password", token=token, _external=True)
-            get_queue().enqueue(
-                send_email,
-                recipient=user.email,
-                subject="Reset Your Password",
-                template="account/email/reset_password",
-                user=user,
-                reset_link=reset_link,
-                next=request.args.get("next"),
-            )
-        flash(
-            "A password reset link has been sent to {}.".format(form.email.data),
+            try:
+                send_email(
+                    recipient=user.email,
+                    subject="Reset Your Password",
+                    template="account/email/reset_password",
+                    user=user,
+                    reset_link=reset_link,
+                    next=request.args.get("next"),
+                )
+                flash(
+                "A password reset link has been sent to {}.".format(form.email.data),
+                "warning",
+                )
+                return redirect(url_for("account.login"))
+            except Exception as e:
+                print(e)
+                flash(
+                "Failed to send password reset link to {}.".format(form.email.data),
+                "error",
+                )
+                return redirect(url_for("account.login"))
+
+        else:
+            flash(
+            "Failed to send reset email to {}.".format(form.email.data),
             "warning",
-        )
-        return redirect(url_for("account.login"))
+            )
+            return redirect(url_for("account.login"))
     return render_template("account/reset_password.html", form=form)
 
 
@@ -176,20 +196,26 @@ def change_email_request():
             change_email_link = url_for(
                 "account.change_email", token=token, _external=True
             )
-            get_queue().enqueue(
-                send_email,
-                recipient=new_email,
-                subject="Confirm Your New Email",
-                template="account/email/change_email",
-                # current_user is a LocalProxy, we want the underlying user
-                # object
-                user=current_user._get_current_object(),
-                change_email_link=change_email_link,
-            )
-            flash(
-                "A confirmation link has been sent to {}.".format(new_email), "warning"
-            )
-            return redirect(url_for("main.index"))
+            try:
+                send_email(
+                    recipient=new_email,
+                    subject="Confirm Your New Email",
+                    template="account/email/change_email",
+                    # current_user is a LocalProxy, we want the underlying user
+                    # object
+                    user=current_user._get_current_object(),
+                    change_email_link=change_email_link,
+                )
+                flash(
+                    "A confirmation link has been sent to {}.".format(new_email), "warning"
+                )
+                return redirect(url_for("main.index"))
+            except Exception as e:
+                print(e)
+                flash(
+                    "Failed sending confirmation link to {}.".format(new_email), "error"
+                )
+                return redirect(url_for("main.index"))
         else:
             flash("Invalid email or password.", "form-error")
     return render_template("account/manage.html", form=form)
@@ -210,23 +236,28 @@ def change_email(token):
 @login_required
 def confirm_request():
     """Respond to new user's request to confirm their account."""
-    print("Hello Confirm Request")
     token = current_user.generate_confirmation_token()
     confirm_link = url_for("account.confirm", token=token, _external=True)
-    get_queue().enqueue(
-        send_email,
-        recipient=current_user.email,
-        subject="Confirm Your Account",
-        template="account/email/confirm",
-        # current_user is a LocalProxy, we want the underlying user object
-        user=current_user._get_current_object(),
-        confirm_link=confirm_link,
-    )
-    flash(
-        "A new confirmation link has been sent to {}.".format(current_user.email),
-        "warning",
-    )
-    return redirect(url_for("main.index"))
+    try:
+        send_email(
+            recipient=current_user.email,
+            subject="Confirm Your Account",
+            template="account/email/confirm",
+            # current_user is a LocalProxy, we want the underlying user object
+            user=current_user._get_current_object(),
+            confirm_link=confirm_link,
+        )
+        flash(
+            "A new confirmation link has been sent to {}.".format(current_user.email),
+            "warning",
+        )
+        return redirect(url_for("main.index"))
+    except Exception as e:
+        flash(
+            "Failed sending confirmation link to {}.".format(current_user.email),
+            "error",
+        )
+        return redirect(url_for("main.index"))
 
 
 @account.route("/confirm-account/<token>")
@@ -275,27 +306,33 @@ def join_from_invite(user_id, token):
             return redirect(url_for("account.login"))
         return render_template("account/join_invite.html", form=form)
     else:
-        flash(
-            "The confirmation link is invalid or has expired. Another "
-            "invite email with a new link has been sent to you.",
-            "error",
-        )
         token = new_user.generate_confirmation_token()
         invite_link = url_for(
             "account.join_from_invite", user_id=user_id, token=token, _external=True
         )
-        get_queue().enqueue(
-            send_email,
-            recipient=new_user.email,
-            subject="You Are Invited To Join",
-            template="account/email/invite",
-            user=new_user,
-            invite_link=invite_link,
-        )
+        try:
+            send_email(
+                recipient=new_user.email,
+                subject="You Are Invited To Join",
+                template="account/email/invite",
+                user=new_user,
+                invite_link=invite_link,
+            )
+            flash(
+            "The confirmation link is invalid or has expired. Another "
+            "invite email with a new link has been sent to you.",
+            "error",
+            )
+        except Exception as e:
+            print(e)
+            flash(
+            "Failed to send new invitation email",
+            "error",
+            )
+            return 
     return redirect(url_for("main.index"))
 
 
-"""
 @account.before_app_request
 def before_request():
     #Force user to confirm email before accessing login-required routes.
@@ -305,7 +342,7 @@ def before_request():
         and not request.endpoint.startswith("account.")
         and request.endpoint != "static"
     ):
-        return redirect(url_for("account.unconfirmed"))"""
+        return redirect(url_for("account.unconfirmed"))
 
 
 @account.route("/unconfirmed")

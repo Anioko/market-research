@@ -203,15 +203,21 @@ def blog_post_create():
                 sent_to = User.query.filter_by(email=e).first()
                 if sent_to:
                     sent_to = sent_to.id
-                get_queue().enqueue(
-                    send_email,
-                    recipient=e,
-                    subject="You may like this new update we have just posted on Mediville",
-                    template="account/email/announcement",
-                    user=current_user.id,
-                    blog_post=cat.id,
-                    sent_to=sent_to,
-                )
+                try:
+                    send_email(
+                        recipient=e,
+                        subject="You may like this new update we have just posted on Mediville",
+                        template="account/email/announcement",
+                        user=current_user.id,
+                        blog_post=cat.id,
+                        sent_to=sent_to,
+                    )
+                except Exception as e:
+                    print(e)
+                    flash(
+                        "Failed to send blog post updates {}.".format(current_user.email),
+                        "error",
+                    )
             return redirect(url_for("admin.blog_posts"))
     return render_template("admin/blog/posts/add-edit.html", form=form)
 

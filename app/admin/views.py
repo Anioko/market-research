@@ -161,20 +161,24 @@ def invite_user():
             email=form.email.data,
         )
         db.session.add(user)
-        db.session.commit()
         token = user.generate_confirmation_token()
+        db.session.commit()
+
         invite_link = url_for(
             "account.join_from_invite", user_id=user.id, token=token, _external=True
         )
-        get_queue().enqueue(
-            send_email,
-            recipient=user.email,
-            subject="You Are Invited To Join",
-            template="account/email/invite",
-            user=user,
-            invite_link=invite_link,
-        )
-        flash("User {} successfully invited".format(user.full_name()), "form-success")
+        try:
+            send_email(
+                recipient=user.email,
+                subject="You Are Invited To Join",
+                template="account/email/invite",
+                user=user,
+                invite_link=invite_link,
+            )
+            flash("User {} successfully invited".format(user.full_name()), "form-success")
+        except Exception as e:
+            print(e)
+            flash("Sending User {} invitation failed!".format(user.full_name()), "error")
     return render_template("admin/new_user.html", form=form)
 
 
@@ -517,7 +521,6 @@ def delete_trackingscript(id):
 @admin_required
 def toggle_user_respondent(user_id):
     user = User.query.filter_by(id=user_id).first()
-    print(user_id)
     user.is_respondent = not user.is_respondent
     db.session.add(user)
     db.session.commit()

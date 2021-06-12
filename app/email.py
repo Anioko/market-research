@@ -7,7 +7,9 @@ from flask_mail import Mail
 from app import create_app
 from sendgrid import From
 from app.models import User
-
+from flask_rq import job
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import *
 ##from app import mail
 ##
 ##
@@ -32,7 +34,25 @@ if os.path.exists(env_file):
             os.environ[var[0]] = var[1].replace('"', "")
 
 
+@job
 def send_email(recipient, subject, template, **kwargs):
+    body = render_template(template + ".html", **kwargs)
+    message = Mail(
+        from_email= os.environ.get("MAIL_DEFAULT_SENDER") or "MarketResearch.com.ng",
+        to_emails=recipient,
+        subject=subject,
+        html_content=body
+        )
+    try:
+        sendgrid_client = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        response = sendgrid_client.send(message)
+    except Exception as e:
+        print(e)
+        raise e
+
+
+@job
+def send_email_old(recipient, subject, template, **kwargs):
     app = create_app(os.getenv("FLASK_CONFIG") or "default")
     app.config["SERVER_NAME"] = (
         os.environ.get("SERVER_NAME") or "www.marketresearch.com.ng"
@@ -46,7 +66,7 @@ def send_email(recipient, subject, template, **kwargs):
     app.config["MAIL_USE_SSL"] = os.environ.get("MAIL_USE_SSL") or False
     app.config["SSL_DISABLE"] = os.environ.get("SSL_DISABLE") or False
     app.config["MAIL_AUTH_TYPE"] = os.environ.get("MAIL_AUTH_TYPE") or "sendgrid"
-    app.config["SENDGRID_API_KEY"] = os.environ.get("SENDGRID_API_KEY") or None
+    app.config["SENDGRID_API_KEY"] = os.environ.get("SENDGRID_API_KEY")
     app.config["MAIL_USERNAME"] = os.environ.get("MAIL_USERNAME")
     app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD")
     app.config["MAIL_DEFAULT_SENDER"] = (
@@ -58,6 +78,7 @@ def send_email(recipient, subject, template, **kwargs):
     app.config["EMAIL_SENDER"] = app.config["MAIL_DEFAULT_SENDER"]
     app.config["MAIL_SUPPRESS_SEND"] = False
     mail.init_app(app)
+    
     with app.app_context():
         print()
         msg = Message(
@@ -65,6 +86,8 @@ def send_email(recipient, subject, template, **kwargs):
             sender=app.config["EMAIL_SENDER"],
             recipients=[recipient],
         )
+
         msg.body = render_template(template + ".txt", **kwargs)
         msg.html = render_template(template + ".html", **kwargs)
+        print(msg.html)
         mail.send(msg)
