@@ -124,7 +124,6 @@ def paid_questions_answered(project_id):
     project = db.session.query(Project).filter_by(id=project_id).first()
 
     questions_stats = []
-    answers_count = []
     for pq in paid_questions:
         # answers = db.session.query(Answer).filter_by(question_id=pq.id).count()
         answers = (
@@ -141,7 +140,6 @@ def paid_questions_answered(project_id):
             .count()
         )
         q_stat = {"title": pq.title, "answers": answers, "id": pq.id}
-        answers_count.append(answers)
         questions_stats.append(q_stat)
 
 
