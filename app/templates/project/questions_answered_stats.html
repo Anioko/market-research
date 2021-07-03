@@ -23,16 +23,16 @@
         <table class="ui celled table">
             <thead>
                 <tr>
-                    <th>Question</th>
-                    <th>No. of Answers</th>
-                    <th>Action</th>
+                    <th><h3>Question</h3></th>
+                    <th><h3>No. of Answers</h3></th>
+                    <th><h3>Action</h3></th>
                 </tr>
             </thead>
             <tbody>
                 {% for question in questions %}
                     <tr>
-                        <td><h3 class="ui left floated header">{{ question.title }}</h3></td>
-                        <td><h3 class="ui left floated header">{{ question.answers }}</h3></td>
+                        <td><h4 class="ui left floated header">{{ question.title }}</h4></td>
+                        <td><h4 class="ui left floated header">{{ question.answers }}</h4></td>
                         <td><a class="ui blue right floated button"
                             href="{{ url_for('question.user_question_answers', question_id=question.id) }}">View answers</a></td>
                     </tr>
