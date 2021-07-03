@@ -23,23 +23,38 @@
         <table class="ui celled table">
             <thead>
                 <tr>
-                    <th><h3>Question</h3></th>
-                    <th><h3>No. of Answers</h3></th>
-                    <th><h3>Action</h3></th>
+                    <th>
+                        <h3>Question</h3>
+                    </th>
+                    <th>
+                        <h3>No. of Answers</h3>
+                    </th>
+                    <th>
+                        <h3>Action</h3>
+                    </th>
                 </tr>
             </thead>
             <tbody>
                 {% for question in questions %}
-                    <tr>
-                        <td><h4 class="ui left floated header">{{ question.title }}</h4></td>
-                        <td><h4 class="ui left floated header">{{ question.answers }}</h4></td>
-                        <td><a class="ui blue right floated button"
-                            href="{{ url_for('question.user_question_answers', question_id=question.id) }}">View answers</a></td>
-                    </tr>
+                <tr>
+                    <td>
+                        <h4 class="ui left floated header">{{ question.title }}</h4>
+                    </td>
+                    <td>
+                        <h4 class="ui left floated header">{{ question.answers }}</h4>
+                    </td>
+                    <td>
+                        <div>
+                            <a class="ui blue right floated button"
+                                href="{{ url_for('question.user_question_answers', question_id=question.id) }}">View
+                                answers</a>
+                        </div>
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
-      
+
 
     </div>
 </div>
