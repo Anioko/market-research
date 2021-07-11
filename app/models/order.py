@@ -38,6 +38,20 @@ class StripeEvent(db.Model):
     receipt_url = db.Column(db.String(64))
     type = db.Column(db.String(10))
 
+class PaystackTransaction(db.Model):
+    __tablename__ = "paystack_transaction"
+    id = db.Column(db.Integer, primary_key=True)
+    currency = db.Column(db.String)
+    created_date = db.Column(db.DateTime, default=db.func.now())
+    paid_date = db.Column(db.DateTime)
+    customer_email = db.Column(db.String(64))
+    customer_name = db.Column(db.String(64))
+    payment_reference = db.Column(db.String(64))
+    payment_method = db.Column(db.String(10))
+    payment_status = db.Column(db.String(10))
+    gateway_response = db.Column(db.String(10))
+    payment_amount = db.Column(db.Integer)
+    payment_fees=db.Column(db.Integer)
 
 class Order(db.Model):
     __tablename__ = "order"
@@ -52,17 +66,12 @@ class Order(db.Model):
     line_item_id = db.Column(db.Integer, db.ForeignKey("line_items.line_item_id"))
     quantity = db.Column(db.Integer)
     currency = db.Column(db.String(3))
-    payment_intent = db.Column(db.String(180))
     customer_email = db.Column(db.String(64))
     payment_method = db.Column(db.String(10))
     payment_status = db.Column(db.String(10))
-    total_amount = db.Column(db.Integer)
-    session_id = db.Column(db.String(90))
-    delivered = db.Column(db.Boolean(), default=False)
+    payment_amount = db.Column(db.Integer)
+    payment_id = db.Column(db.String(90))
     created_at = db.Column(db.DateTime, default=db.func.now())
-    start_date = db.Column(db.DateTime)
-    end_date = db.Column(db.DateTime)
-    updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
     org = db.relationship("Organisation", backref=db.backref("orders", order_by=id))
     user = db.relationship("User", backref=db.backref("orders", order_by=id))
     project = db.relationship("Project", backref=db.backref("orders", order_by=id))

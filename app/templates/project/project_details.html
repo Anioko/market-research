@@ -164,7 +164,7 @@
 		;
 	  </script>
 	  <script>
-			const button = document.querySelector('#buy_now_btn');
+			/*const button = document.querySelector('#buy_now_btn');
 
 			button.addEventListener('click', event => {
 				fetch('/stripe_pay')
@@ -182,7 +182,7 @@
 						// using `result.error.message`.
 					});
 				})
-			});
+			});*/
 	  </script>
 {% endblock %}
 {% block scripts %}
@@ -208,38 +208,10 @@
             return false;
         }
     </script>
-      <script src="https://js.stripe.com/v3/"></script>
-      {#
-      <script type="text/javascript">
-        const checkout_public_key = '{{checkout_public_key}}';
-        const checkout_session_id = '{{checkout_session_id}}';
-      </script>
-      #}
 	  <script>
 		$('select.dropdown')
 			.dropdown()
 		;
 	  </script>
-	  <script>
-			const button = document.querySelector('#buy_now_btn');
-
-			button.addEventListener('click', event => {
-				fetch('/stripe_pay')
-				.then((result) => { return result.json(); })
-				.then((data) => {
-					var stripe = Stripe(data.checkout_public_key);
-					stripe.redirectToCheckout({
-						// Make the id field from the Checkout Session creation API response
-						// available to this file, so you can provide it as parameter here
-						// instead of the {{CHECKOUT_SESSION_ID}} placeholder.
-						sessionId: data.checkout_session_id
-					}).then(function (result) {
-						// If `redirectToCheckout` fails due to a browser or network
-						// error, display the localized error message to your customer
-						// using `result.error.message`.
-					});
-				})
-			});
-	  </script>
-      <!---<script src="{{ url_for('static', filename='script-ajax.js') }}"></script>--->
+  
 {% endblock %}

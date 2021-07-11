@@ -80,7 +80,6 @@ def send_email_old(recipient, subject, template, **kwargs):
     mail.init_app(app)
     
     with app.app_context():
-        print()
         msg = Message(
             app.config["EMAIL_SUBJECT_PREFIX"] + " " + subject,
             sender=app.config["EMAIL_SENDER"],
@@ -89,5 +88,4 @@ def send_email_old(recipient, subject, template, **kwargs):
 
         msg.body = render_template(template + ".txt", **kwargs)
         msg.html = render_template(template + ".html", **kwargs)
-        print(msg.html)
         mail.send(msg)

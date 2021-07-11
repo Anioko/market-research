@@ -269,8 +269,6 @@ def project_questions(project_id):
 @project.route("/<int:project_id>/details/<name>/", methods=["GET", "POST"])
 def project_details(project_id, name):
     screener_questions_poly = with_polymorphic(Question, [ScreenerQuestion])
-    scale_questions_poly = with_polymorphic(Question, [ScaleQuestion])
-    mc_questions_poly = with_polymorphic(Question, [MultipleChoiceQuestion])
 
     check_point = (
         db.session.query(screener_questions_poly)
@@ -385,6 +383,7 @@ def project_details(project_id, name):
                 "project.order_details",
                 project_id=project_id,
                 name=project.name,
+                email=current_user.email
             )
         )
 
@@ -410,8 +409,14 @@ def order_details(project_id, name):
         .first()
     )
     org = Organisation.query.filter_by(id=project.organisation_id).first_or_404()
-    order = (
+    line_item = (
         db.session.query(LineItem)
+        .filter_by(user_id=current_user.id)
+        .filter_by(project_id=project_id)
+        .first()
+    )
+    order = (
+        db.session.query(Order)
         .filter_by(user_id=current_user.id)
         .filter_by(project_id=project_id)
         .first()
@@ -426,6 +431,7 @@ def order_details(project_id, name):
         project_id=project_id,
         org=org,
         project=project,
+        line_item=line_item,
         order=order,
         is_paid=project_is_paid,
         today=today,
@@ -438,7 +444,7 @@ def edit_project(project_id, name):
 
     project = (
         Project.query.filter_by(user_id=current_user.id)
-        .filter_by(id=project_id)
+    .filter_by(id=project_id)
         .first_or_404()
     )
     if not project:
