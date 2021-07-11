@@ -156,7 +156,7 @@ def paystack_pay(project_id):
     ref = generate_reference()
     trans = paystack.transaction.initialize(
         amount=unit_amount,
-        email="yekuwilfred@gmail.com",
+        email=current_user.email,
         reference=ref,
         callback_url=url_for(
             "main.verify_paystack_transaction",
