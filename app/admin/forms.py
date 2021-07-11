@@ -50,6 +50,11 @@ class ChangeAccountTypeForm(FlaskForm):
     )
     submit = SubmitField("Update role")
 
+class ConfirmAccountForm(FlaskForm):
+    confirmed = BooleanField('True: Tick this checkbox to confirm the users account manually',
+                             validators=[InputRequired()])
+    submit = SubmitField('Confirm')
+
 
 class InviteUserForm(FlaskForm):
     role = QuerySelectField(
