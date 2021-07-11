@@ -166,15 +166,6 @@ def paystack_pay(project_id):
         currency=currency,
     )
     return jsonify(trans)
-    """
-
-    db.session.add(order)
-    db.session.commit()
-    return {
-        "checkout_session_id": session["id"],
-        "checkout_public_key": "pk_test_oqKtiHQipsUaIuR81LYSiDW2",
-    }"""
-
 
 @main.route("/thanks/<line_item_id>/<project_id>")
 def thanks(line_item_id, project_id):
