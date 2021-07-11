@@ -67,14 +67,14 @@
 				<tr>
 				  <td>1</td>
 				  <td> {{ line_item.project.name }}</td>
-				  <td> {{ line_item.currency }} {{ line_item.unit_amount }}.00</td>
+				  <td> {{ line_item.currency }} {{ line_item.unit_amount/100 }}</td>
 				  <td> {{ line_item.quantity }} responses</td>
 				  <td>{{ line_item.tax_percentage }}</td> <!---enable when ready --->
 				  <td>{{ line_item.tax_amount }}</td> <!---enable when ready --->
 				</tr>
 			  </tbody>
 			</table>
-			  <h3 class="ui right floated">Total Amount: {{ line_item.currency }} {{ line_item.unit_amount }}</h3>		
+			  <h3 class="ui right floated">Total Amount:  {{ (line_item.unit_amount * line_item.quantity)/100 }} {{ line_item.currency }}</h3>		
 			<div class="ui divider"></div>
 			{% if is_paid %}
 			  <div class="field">
@@ -105,5 +105,39 @@
 						// using `result.error.message`.
 					});
 				})
+	  </script>
+	  <script src="https://js.stripe.com/v3/"></script>
+      {#
+      <script type="text/javascript">
+        const checkout_public_key = '{{checkout_public_key}}';
+        const checkout_session_id = '{{checkout_session_id}}';
+      </script>
+      #}
+	  <script>
+		$('select.dropdown')
+			.dropdown()
+		;
+	  </script>
+	  <script>
+			/*const button = document.querySelector('#buy_now_btn');
+
+			button.addEventListener('click', event => {
+				fetch('/stripe_pay')
+				.then((result) => { return result.json(); })
+				.then((data) => {
+					var stripe = Stripe(data.checkout_public_key);
+					stripe.redirectToCheckout({
+						// Make the id field from the Checkout Session creation API response
+						// available to this file, so you can provide it as parameter here
+						// instead of the {{CHECKOUT_SESSION_ID}} placeholder.
+						sessionId: data.checkout_session_id
+					}).then(function (result) {
+						// If `redirectToCheckout` fails due to a browser or network
+						// error, display the localized error message to your customer
+						// using `result.error.message`.
+					});
+				})
+			});
+			*/
 	  </script>
 {% endblock %}

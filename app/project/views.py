@@ -340,11 +340,11 @@ def project_details(project_id, name):
     ## calculate currency
     currency = project_item.currency
     if currency == "NGN" and project_item.service_type == "Silver":
-        unit_amount = 6600
+        unit_amount = 66000
     elif currency == "NGN" and project_item.service_type == "Gold":
-        unit_amount = 9000
+        unit_amount = 90000
     elif currency == "NGN" and project_item.service_type == "Platinum":
-        unit_amount = 12000
+        unit_amount = 120000
     elif currency == "USD" and project_item.service_type == "Silver":
         unit_amount = 200
     elif currency == "USD" and project_item.service_type == "Gold":

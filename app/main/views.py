@@ -70,6 +70,102 @@ def index():
 def cancel():
     return render_template("main/cancel.html")
 
+"""
+@main.route("/stripe_pay")
+def stripe_pay():
+    line_item = LineItem.query.filter_by(user_id=current_user.id).first()
+    project = Project.query.filter_by(
+        user_id=current_user.id, id=line_item.project_id
+    ).first()
+    # if order.created_at == Order.created_at
+    quantity = line_item.quantity
+    currency = line_item.currency
+    name = line_item.project.name
+    unit_amount = line_item.unit_amount
+    session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        line_items=[
+            {
+                "price_data": {
+                    "currency": currency,
+                    "product_data": {
+                        "name": name,
+                    },
+                    "unit_amount": unit_amount,
+                },
+                "quantity": quantity,
+            }
+        ],
+        mode="payment",
+        success_url=url_for(
+            "main.thanks",
+            line_item_id=line_item.line_item_id,
+            project_id=project.id,
+            _external=True,
+        )
+        + "?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url=url_for("main.cancel", _external=True),
+    )
+
+    order = Order(
+        user_id=current_user.id,
+        project_id=line_item.project_id,
+        line_item_id=line_item.line_item_id,
+        organisation_id=project.organisation_id,
+        session_id=session["id"],
+        start_date=today.strftime("%B %d, %Y"),
+        payment_method=session["payment_method_types"],
+        currency=session["currency"],
+        total_amount=session["amount_total"],
+        customer_email=session["customer_email"],
+        payment_intent=session["payment_intent"],
+    )
+
+    db.session.add(order)
+    db.session.commit()
+    return {
+        "checkout_session_id": session["id"],
+        "checkout_public_key": "pk_test_oqKtiHQipsUaIuR81LYSiDW2",
+    }"""
+
+
+@main.route("/paystack/<project_id>")
+def paystack_pay(project_id):
+    line_item = LineItem.query.filter_by(project_id=project_id).first()
+    project = Project.query.filter_by(
+        user_id=current_user.id, id=line_item.project_id
+    ).first()
+
+    currency = line_item.currency
+    name = project.name
+    unit_amount = line_item.unit_amount
+
+    meta_data = {
+        "cancel_action": url_for("main.cancel", _external=True),
+        "custom_fields": [
+            {
+                "display_name": "Project Name",
+                "variable_name": "project_name",
+                "value": name,
+            }
+        ],
+    }
+    total_amount = unit_amount * line_item.quantity
+    ref = generate_reference()
+
+    trans = paystack.transaction.initialize(
+        amount=total_amount,
+        email=current_user.email,
+        reference=ref,
+        callback_url=url_for(
+            "main.verify_paystack_transaction",
+            _external=True,
+        ),
+        metadata=meta_data,
+        currency=currency,
+    )
+    return jsonify(trans)
+
 
 @main.route("/payments/failed")
 def failed_payment():
@@ -103,7 +199,7 @@ def verify_paystack_transaction():
         gateway_response=data["gateway_response"],
         payment_status=data["status"],
         payment_fees=data["fees"],
-        payment_amount=data["amount"],
+        payment_amount=(data["amount"]/100),
     )
     order = Order(
         user_id=current_user.id,
@@ -116,7 +212,7 @@ def verify_paystack_transaction():
         payment_method=data["channel"],
         currency=data["currency"],
         payment_status=data["status"],
-        payment_amount=data["amount"],
+        payment_amount=(data["amount"]/100),
         customer_email=customer["email"],
     )
     db.session.add(trans)
@@ -131,41 +227,6 @@ def verify_paystack_transaction():
         )
     )
 
-
-@main.route("/paystack/<project_id>")
-def paystack_pay(project_id):
-    line_item = LineItem.query.filter_by(project_id=project_id).first()
-    project = Project.query.filter_by(
-        user_id=current_user.id, id=line_item.project_id
-    ).first()
-    # if order.created_at == Order.created_at
-    currency = line_item.currency
-    name = project.name
-    unit_amount = line_item.unit_amount * 100
-
-    meta_data = {
-        "cancel_action": url_for("main.cancel", _external=True),
-        "custom_fields": [
-            {
-                "display_name": "Project Name",
-                "variable_name": "project_name",
-                "value": name,
-            }
-        ],
-    }
-    ref = generate_reference()
-    trans = paystack.transaction.initialize(
-        amount=unit_amount,
-        email=current_user.email,
-        reference=ref,
-        callback_url=url_for(
-            "main.verify_paystack_transaction",
-            _external=True,
-        ),
-        metadata=meta_data,
-        currency=currency,
-    )
-    return jsonify(trans)
 
 @main.route("/thanks/<line_item_id>/<project_id>")
 def thanks(line_item_id, project_id):
@@ -186,6 +247,22 @@ def thanks(line_item_id, project_id):
         return render_template("main/thanks.html")
 
     return render_template("main/thanks.html")
+
+"""@main.route("/webhook/endpoint")
+def order():
+
+    session = stripe.checkout.Session.list(limit=3)
+    print(session["data"])
+    for stripe_session in session["data"]:
+        session = stripe_session
+
+    payment_status = stripe_session.get("payment_status")
+    quantity = stripe_session.get("quantity")
+    payment_method_types = stripe_session.get("payment_method_types")
+    payment_intent = stripe_session.get("payment_intent")
+    currency = stripe_session.get("currency")
+
+    return render_template("main/thanks.html")"""
 
 @main.route("/upload", methods=["POST"])
 def upload():
