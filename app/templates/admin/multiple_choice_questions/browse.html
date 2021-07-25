@@ -55,7 +55,7 @@
                             <td>{{ question.title }}</td>
                             <td>
                                 <a class="ui red left floated button" style="margin-top: 1px"
-                                   href="{{ url_for('admin.delete_multiple_choice_questions', question_id=question.id) }}" onclick="return confirmDeleteQuestion('{{ question.id | tojson }}');" data-content="{{ question.id }}">Delete</a>
+                                   href="{{ url_for('admin.delete_multiple_choice_question', question_id=question.id) }}">Delete</a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -71,7 +71,7 @@
                     {% for page in questions.iter_pages() %}
                         {% if page %}
                             {% if page != questions.page %}
-                                <a class="item" href="{{ url_for('admin.scale_questions', page=page) }}">
+                                <a class="item" href="{{ url_for('admin.multiple_choice_question', page=page) }}">
                                     {{ page }}
                                 </a>
                             {% else %}
@@ -90,7 +90,7 @@
 
 
         </div>
-        <form method="POST" action="{{ url_for('admin.delete_scale_questions', question_id=0) }}" id="delete-question-form">
+        <form method="POST" action="{{ url_for('admin.delete_multiple_choice_question', question_id=0) }}" id="delete-question-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         </form>
     </div>
@@ -111,7 +111,7 @@
                 .then((willDelete) => {
                     if (willDelete) {
                         let form = $("#delete-question-form");
-                        form.attr('action', "{{ url_for('admin.delete_scale_questions', question_id=0) }}".replace('0',question_id));
+                        form.attr('action', "{{ url_for('admin.delete_multiple_choice_question', question_id=0) }}".replace('0',question_id));
                         form.submit();
                     } else {
                         return false;

@@ -16,3 +16,8 @@ def page_not_found(_):
 @admin.app_errorhandler(500)
 def internal_server_error(_):
     return render_template("errors/500.html"), 500
+
+@admin.errorhandler(Exception)
+def catch_exception_error(error):
+    print(error)
+    return render_template('errors/404.html')

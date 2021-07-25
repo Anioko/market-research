@@ -50,7 +50,7 @@ def generate_reference():
 
 # This is your real test secret API key.
 stripe.api_key = "sk_test_hqoFMPptGIiQJSuk6Yg6B2Fr"
-PAYSTACK_SECRET = "sk_test_8a72756aa71524066c2ae2974e50dc63c142e075"
+PAYSTACK_SECRET = "sk_live_a6bf8f4e1d03659f6f686f0afd8b686cc1819d53"
 paystack = Paystack(secret_key=PAYSTACK_SECRET)
 
 today = date.today()

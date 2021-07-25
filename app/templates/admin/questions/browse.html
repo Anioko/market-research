@@ -45,21 +45,19 @@
                         <th>Question Title</th>
                         <th>Asked By</th>
                         <th class="sorted ascending">Created At</th>
-                        <th>Last Update</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {% for question in questions.items | sort(attribute='created_at') %}
+                    {% for question in questions.items | sort(attribute='id') %}
                         <tr>
 
                             <td>{{ question.title[:50] }}...</td>
                             <td>{{ question.project.name }}</td>
                             <td>{{ question.created_at }}</td>
-                            <td>{{ question.updated_at }}</td>
                             <td> 
                                 <a class="ui red left floated button" style="margin-top: 1px"
-                                   href="{{ url_for('admin.delete_question', question_id=question.id) }}" onclick="return confirmDeleteQuestion('{{ question.id | tojson }}');" data-content="{{ question.id }}">Delete</a>
+                                   href="{{ url_for('admin.delete_question', question_id=question.id) }}">Delete</a>
                             </td>
                         </tr>
                     {% endfor %}

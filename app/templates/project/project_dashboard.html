@@ -61,10 +61,13 @@
                                 <!---<a class="ui red left floated button" style="margin-top: 1px"
                                    href="{# url_for('project.delete_project', project_id=u.id) #}" onclick="return confirmDeleteProject('{{ project.id }}');" data-content="{{ project.id }}">Delete</a>--->						
                             </td>
-                            <td>
+                            <td> {% if current_user.role_id == 2 %}
+                                <a class="ui blue left floated button" href="{{ url_for('project.admin_project_details', org_id=u.organisation_id, project_id=u.id, name=u.name) }}">Admin Enter</a>                              
+				{% else %}
                                 <a class="ui blue left floated button" href="{{ url_for('project.project_details', org_id=u.organisation_id, project_id=u.id, name=u.name) }}">Enter</a>
-                                <!---<a class="ui red left floated button" style="margin-top: 1px"
-                                   href="{# url_for('project.delete_project', project_id=u.id) #}" onclick="return confirmDeleteProject('{{ project.id }}');" data-content="{{ project.id }}">Delete</a>--->						
+                                <!---<a class="ui red left floated button" style="margin-top: 1px"href="{# url_for('project.delete_project', project_id=u.id) #}" onclick="return confirmDeleteProject('{{ project.id }}');" data-content="{{ project.id }}">Delete</a>--->
+                                {% endif %}
+                                   						
                             </td>
                             {% if u.answers_count > 250 %}
                                 <td>

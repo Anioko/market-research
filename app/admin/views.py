@@ -339,16 +339,27 @@ def multiple_choice_questions(page):
         "admin/multiple_choice_questions/browse.html", questions=questions_result
     )
 
-
-@admin.route("/scl/<int:question_id>/_delete", methods=["GET", "POST"])
+@admin.route("/mcq/<int:question_id>/_delete", methods=["GET"])
 @login_required
 @admin_required
-def delete_multiple_choice_questions(questions_id):
+def delete_multiple_choice_question(question_id):
     question = MultipleChoiceQuestion.query.filter_by(id=question_id).first()
     db.session.delete(question)
     db.session.commit()
-    flash("Successfully deleted a multi choice question.", "success")
+    flash("Successfully deleted question.", "success")
     return redirect(url_for("admin.multiple_choice_questions"))
+
+
+@admin.route("/question/<int:question_id>/_delete", methods=["GET"])
+@login_required
+@admin_required
+def delete_question(question_id):
+    question = Question.query.filter_by(id=question_id).first()
+    db.session.delete(question)
+    db.session.commit()
+    flash("Successfully deleted question.", "success")
+    return redirect(url_for("admin.questions"))
+
 
 
 @admin.route("/questions", defaults={"page": 1}, methods=["GET"])
@@ -361,15 +372,6 @@ def questions(page):
 
     return render_template("admin/questions/browse.html", questions=questions_result)
 
-
-@admin.route("/question/<int:question_id>/_delete", methods=["GET"])
-@login_required
-@admin_required
-def delete_question(question_id):
-    question = Question.query.filter_by(id=question_id).first()
-    db.session.commit()
-    flash("Successfully deleted question.", "success")
-    return redirect(url_for("admin.questions"))
 
 
 @admin.route("/projects", defaults={"page": 1}, methods=["GET"])
@@ -550,3 +552,28 @@ def toggle_user_respondent(user_id):
     db.session.commit()
     flash("Successfully Changes user %s Seller Status." % user.full_name(), "success")
     return redirect(url_for("admin.registered_users"))
+
+@admin.route("/projects", defaults={"page": 1}, methods=["GET"])
+@admin.route("/projects/<int:page>", methods=["GET"])
+@login_required
+def admin_question(page):
+    """Question dashboard page."""
+    orgs = Organisation.query.all()
+    org_ids = [org.id for org in orgs]
+
+    paid_projects = (
+        db.session.query(PaidProject).filter(Organisation.id.in_(org_ids)).all()
+    )
+    project_ids = [project.project_id for project in paid_projects]
+
+    projects = (
+        db.session.query(Project)
+        .filter(Project.id.in_(project_ids))
+        .paginate(page, per_page=10)
+    )
+
+    return render_template(
+        "question/question_dashboard.html",
+        projects=projects,
+    )
+

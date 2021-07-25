@@ -149,6 +149,44 @@ def paid_questions_answered(project_id):
         questions=questions_stats,
     )
 
+@project.route("/<project_id>/admin/questions", methods=["GET"])
+@login_required
+def admin_questions_answered(project_id):
+    answers_poly = with_polymorphic(Answer, "*")
+    paid_questions = (
+        db.session.query(Question)
+        .join(Project)
+        .filter(Project.id == project_id)
+        .all()
+    )
+    project = db.session.query(Project).filter_by(id=project_id).first()
+
+    questions_stats = []
+    for pq in paid_questions:
+        # answers = db.session.query(Answer).filter_by(question_id=pq.id).count()
+        answers = (
+            db.session.query(answers_poly)
+            .filter(
+                or_(
+                    answers_poly.UAnswer.u_questions_id == pq.id,
+                    answers_poly.MultipleChoiceAnswer.multiple_choice_question_id
+                    == pq.id,
+                    answers_poly.ScreenerAnswer.screener_questions_id == pq.id,
+                    answers_poly.ScaleAnswer.scale_question_id == pq.id,
+                )
+            )
+            .count()
+        )
+        q_stat = {"title": pq.title, "answers": answers, "id": pq.id}
+        questions_stats.append(q_stat)
+
+
+    return render_template(
+        "project/questions_answered_stats.html",
+        project=project,
+        questions=questions_stats,
+    )
+
 
 @project.route("/export/<id>", methods=["GET"])
 def export(id):
@@ -377,15 +415,93 @@ def project_details(project_id, name):
             )
             db.session.add(lineitems_1)
             db.session.commit()
+    
 
+    return render_template(
+        "project/project_details.html",
+        screener_question=screener_question,
+        project_id=project_id,
+        project=project,
+        custom_questions=custom_questions,
+        scale_question=scale_question,
+        multiple_choice_question=multiple_choice_question,
+        count_screener_questions=count_screener_questions,
+        count_questions=count_questions,
+    )
+
+@project.route("/admin/<int:project_id>/details/<name>/", methods=["GET", "POST"])
+def admin_project_details(project_id, name):
+    ''' view for admin to create questions'''
+    screener_questions_poly = with_polymorphic(Question, [ScreenerQuestion])
+
+    check_point = (
+        db.session.query(screener_questions_poly)
+        .filter(ScreenerQuestion.user_id == current_user.id)
+        .filter(ScreenerQuestion.project_id == project_id)
+        .count()
+    )
+    if check_point is None:
+        flash(" You now need to add one screener question.", "success")
         return redirect(
-            url_for(
-                "project.order_details",
-                project_id=project_id,
-                name=project.name,
-                email=current_user.email
-            )
+            url_for("question.new_screener_question", project_id=project_id)
         )
+
+    # screener_question = ScreenerQuestion.query.filter_by(user_id=current_user.id).filter(project_id ==project_id).all()
+    screener_question = (
+        db.session.query(Question)
+        .filter_by(user_id=current_user.id)
+        .filter_by(project_id=project_id)
+        .filter_by(question_type=QuestionTypes.ScreenerQuestion.value)
+        .all()
+    )
+
+    custom_questions = (
+        db.session.query(UQuestion)
+        .filter_by(user_id=current_user.id)
+        .filter_by(project_id=project_id)
+        .all()
+    )
+
+    scale_question = (
+        db.session.query(Question)
+        .filter_by(user_id=current_user.id)
+        .filter_by(project_id=project_id)
+        .filter_by(question_type=QuestionTypes.ScaleQuestion.value)
+        .all()
+    )
+    multiple_choice_question = (
+        db.session.query(Question)
+        .filter_by(user_id=current_user.id)
+        .filter_by(project_id=project_id)
+        .filter_by(question_type=QuestionTypes.MultipleChoiceQuestion.value)
+        .all()
+    )
+    project = (
+        db.session.query(Project)
+        .filter_by(user_id=current_user.id)
+        .filter_by(id=project_id)
+        .first()
+    )
+
+    # count_screener_questions = ScreenerQuestion.query.filter_by(user_id=current_user.id).filter(project_id==project_id).first()
+    count_screener_questions = len(screener_question)
+
+    # count_questions = Question.query.filter_by(user_id=current_user.id).filter(project_id == project_id).count()
+    count_questions = (
+        db.session.query(Question)
+        .filter_by(user_id=current_user.id)
+        .filter_by(project_id=project_id)
+        .count()
+    )
+
+    ## prepare line items
+    project_item = (
+        db.session.query(Project)
+        .filter_by(user_id=current_user.id)
+        .filter_by(id=project_id)
+        .first()
+    )
+    
 
     return render_template(
         "project/project_details.html",
@@ -436,7 +552,6 @@ def order_details(project_id, name):
         is_paid=project_is_paid,
         today=today,
     )
-
 
 @project.route("/<int:project_id>/<name>/edit", methods=["Get", "POST"])
 @login_required
